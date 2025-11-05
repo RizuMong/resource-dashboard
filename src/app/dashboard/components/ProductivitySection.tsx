@@ -55,7 +55,7 @@ export function ProductivitySection({ data }: ProductivitySectionProps) {
   const hasData = Array.isArray(chartData) && chartData.length > 0;
 
   return (
-    <div className="border rounded-xl bg-white shadow-sm p-6">
+    <div className="border rounded-xl bg-white p-6">
       <h2 className="text-lg font-semibold text-gray-800 mb-4">
         Productivity Overview
       </h2>

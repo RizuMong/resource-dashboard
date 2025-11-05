@@ -5,7 +5,7 @@ import { FilterSelect } from "./components/FilterSelect";
 import { ChartSection } from "./components/ChartSection";
 import { ProductivitySection } from "./components/ProductivitySection";
 import { Button } from "@/components/ui/button";
-import { ExportButton } from "./components/ExportButton";
+// import { ExportButton } from "./components/ExportButton";
 import { Loader2 } from "lucide-react";
 
 export default function DashboardPage() {
@@ -25,11 +25,13 @@ export default function DashboardPage() {
     { id: "2", name: "Aria" },
     { id: "3", name: "Dimas" },
   ];
+
   const mockProjects = [
     { id: "p1", name: "Lexus" },
     { id: "p2", name: "BPJS" },
     { id: "p3", name: "Riung IMS" },
   ];
+
   const mockSprints = [
     { id: "s1", name: "Sprint 22 - 2025" },
     { id: "s2", name: "Sprint 23 - 2025" },
@@ -39,20 +41,6 @@ export default function DashboardPage() {
   const mockYears = [
     { id: "s1", name: "2025" },
     { id: "s2", name: "2024" },
-  ];
-
-  const baseChartData = [
-    { name: "Jan", plan: 100, capacity: 220 },
-    { name: "Feb", plan: 120, capacity: 210 },
-    { name: "Mar", plan: 150, capacity: 230 },
-    { name: "Apr", plan: 130, capacity: 200 },
-  ];
-
-  const baseProductivityData = [
-    { name: "Jan", actual: 89, plan: 200 },
-    { name: "Feb", actual: 120, plan: 210 },
-    { name: "Mar", actual: 140, plan: 230 },
-    { name: "Apr", actual: 150, plan: 220 },
   ];
 
   // Update state ketika filter berubah
@@ -68,10 +56,7 @@ export default function DashboardPage() {
     // Simulasi API delay
     await new Promise((r) => setTimeout(r, 1200));
 
-    if (filters.project || filters.person || filters.sprint) {
-      setChartData(baseChartData);
-      setProductivityData(baseProductivityData);
-    } else {
+    if (!filters.project || !filters.person || !filters.sprint) {
       setChartData([]);
       setProductivityData([]);
     }
@@ -80,7 +65,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen space-y-10">
+    <div className="min-h-screen space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         {/* <ExportButton /> */}
@@ -111,8 +96,7 @@ export default function DashboardPage() {
 
         {/* Spacer biar tombol ke kanan */}
         <div className="flex-1"></div>
-
-        {/* Apply Button */}
+        
         {/* Apply Button */}
         <Button
           onClick={handleApplyFilters}
