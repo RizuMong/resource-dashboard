@@ -15,8 +15,22 @@ export default function DashboardPage() {
     sprint: null,
   });
 
-  const [chartData, setChartData] = useState<any[]>([]);
-  const [productivityData, setProductivityData] = useState<any[]>([]);
+  interface chartData {
+    name: string;
+    plan: number;
+    capacity: number;
+  }
+
+  interface productivityData {
+    name: string;
+    plan: number;
+    actual: number;
+  }
+
+  const [chartData, setChartData] = useState<chartData[]>([]);
+  const [productivityData, setProductivityData] = useState<productivityData[]>(
+    []
+  );
   const [loading, setLoading] = useState(false);
 
   // Mock Data
@@ -44,7 +58,10 @@ export default function DashboardPage() {
   ];
 
   // Update state ketika filter berubah
-  const handleFilterChange = (key: string, value: any) => {
+  const handleFilterChange = (
+    key: string,
+    value: { id: string; name: string } | null
+  ) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -96,7 +113,7 @@ export default function DashboardPage() {
 
         {/* Spacer biar tombol ke kanan */}
         <div className="flex-1"></div>
-        
+
         {/* Apply Button */}
         <Button
           onClick={handleApplyFilters}
