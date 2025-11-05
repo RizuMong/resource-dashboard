@@ -54,9 +54,9 @@ export function ChartSection({ data }: ChartSectionProps) {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={chartData}
-            barGap={10}
-            barCategoryGap="25%"
-            margin={{ top: 30, right: 30, left: 10, bottom: 10 }}
+            barGap={8}
+            barCategoryGap="20%"
+            margin={{ top: 20, right: 20, left: 10, bottom: 20 }}
           >
             <CartesianGrid
               strokeDasharray="3 3"
