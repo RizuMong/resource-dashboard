@@ -35,8 +35,8 @@ export function FilterSelect({ label, mockData, onChange }: FilterSelectProps) {
     <div className="relative">
       <Select value={selected} onValueChange={handleSelect}>
         <SelectTrigger
-          className={`w-[200px] bg-white border border-gray-300 text-gray-700 shadow-sm flex items-center justify-between ${
-            selected ? "font-medium" : "text-gray-400"
+          className={`w-[200px] bg-white  text-gray-500 flex items-center justify-between ${
+            selected ? "font-medium" : "text-gray-200"
           }`}
         >
           {/* ✅ tampilkan value / placeholder */}
@@ -47,7 +47,7 @@ export function FilterSelect({ label, mockData, onChange }: FilterSelectProps) {
             <button
               type="button"
               onClick={handleClear}
-              className="absolute right-8 text-gray-400 hover:text-gray-600 transition-colors pointer-events-auto"
+              className="absolute right-8 text-gray-400 transition-colors pointer-events-auto"
               aria-label="Clear selection"
             >
               <X className="w-4 h-4" />
