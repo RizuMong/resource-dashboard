@@ -1,6 +1,7 @@
 // components/ChartSection.tsx
 "use client";
 
+import React from "react";
 import {
   BarChart,
   Bar,
@@ -13,48 +14,57 @@ import {
   Legend,
 } from "recharts";
 
-interface ChartSectionProps {
-  data?: {
-    name: string;
-    plan: number;
-    capacity: number;
-  }[];
-  year?: number | string;
+export interface ChartItem {
+  id?: string;
+  month?: number;
+  name: string;
+  plan: number;
+  capacity: number;
 }
 
-export function ChartSection({ data, year }: ChartSectionProps) {
-  // If year prop not provided, fallback ke current year
+interface ChartSectionProps {
+  data?: ChartItem[];
+  year?: number | string;
+  onBarClick?: (payload: ChartItem) => void;
+}
+
+export function ChartSection({ data, year, onBarClick }: ChartSectionProps) {
   const displayYear = year ?? new Date().getFullYear();
 
-  // Mock data kalau tidak ada data dari props
-  const mockData = [
-    { name: "Jan", plan: 0, capacity: 0 },
-    { name: "Feb", plan: 0, capacity: 0 },
-    { name: "Mar", plan: 0, capacity: 0 },
-    { name: "Apr", plan: 0, capacity: 0 },
-    { name: "May", plan: 0, capacity: 0 },
-    { name: "Jun", plan: 0, capacity: 0 },
-    { name: "Jul", plan: 0, capacity: 0 },
-    { name: "Aug", plan: 0, capacity: 0 },
-    { name: "Sep", plan: 0, capacity: 0 },
-    { name: "Oct", plan: 0, capacity: 0 },
-    { name: "Nov", plan: 0, capacity: 0 },
-    { name: "Dec", plan: 0, capacity: 0 },
+  const mockData: ChartItem[] = [
+    { name: "Jan", plan: 0, capacity: 0, month: 1 },
+    { name: "Feb", plan: 0, capacity: 0, month: 2 },
+    { name: "Mar", plan: 0, capacity: 0, month: 3 },
+    { name: "Apr", plan: 0, capacity: 0, month: 4 },
+    { name: "May", plan: 0, capacity: 0, month: 5 },
+    { name: "Jun", plan: 0, capacity: 0, month: 6 },
+    { name: "Jul", plan: 0, capacity: 0, month: 7 },
+    { name: "Aug", plan: 0, capacity: 0, month: 8 },
+    { name: "Sep", plan: 0, capacity: 0, month: 9 },
+    { name: "Oct", plan: 0, capacity: 0, month: 10 },
+    { name: "Nov", plan: 0, capacity: 0, month: 11 },
+    { name: "Dec", plan: 0, capacity: 0, month: 12 },
   ];
 
   const chartData = data && data.length > 0 ? data : mockData;
+  const hasRealData = Boolean(data && data.length > 0);
 
   const barColors = {
-    plan: "#FACC15", // amber
-    capacity: "#60A5FA", // blue
+    plan: "#FACC15",
+    capacity: "#60A5FA",
   };
 
-  // Determine whether real data exists (not just mock)
-  const hasRealData = Boolean(data && data.length > 0);
+  // recharts onClick handler sends (data, index). We pick data.payload.
+  const handleBarClick = (event: any) => {
+    // event might be undefined when clicking empty areas
+    const payload: ChartItem | undefined = event?.payload;
+    if (!payload) return;
+    if (onBarClick) onBarClick(payload);
+  };
 
   return (
     <div className="border rounded-xl bg-white p-6">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center mb-4">
         <h2 className="text-lg font-semibold text-gray-800">
           Resource Planning{" "}
           <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
@@ -108,6 +118,7 @@ export function ChartSection({ data, year }: ChartSectionProps) {
               name="Total Plan"
               fill={barColors.plan}
               radius={[6, 6, 0, 0]}
+              onClick={handleBarClick}
             >
               <LabelList
                 dataKey="plan"
@@ -127,6 +138,7 @@ export function ChartSection({ data, year }: ChartSectionProps) {
               name="Total Capacity"
               fill={barColors.capacity}
               radius={[6, 6, 0, 0]}
+              onClick={handleBarClick}
             >
               <LabelList
                 dataKey="capacity"

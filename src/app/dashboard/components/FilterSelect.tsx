@@ -13,7 +13,8 @@ import {
 // ==================== API Configuration ====================
 // SECURE: Base URL sudah include company ID, tidak di-expose ke props
 const API_CONFIG = {
-  baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || "https://api-oos.jojonomic.com/14",
+  baseUrl:
+    process.env.NEXT_PUBLIC_API_BASE_URL || "https://api-oos.jojonomic.com/14",
   endpoints: {
     project: "/project-management/project/index",
     sprint: "/project-management/sprint/index",
@@ -54,16 +55,25 @@ class ApiService {
     };
 
     const token = getAuthToken();
-    
+
     console.log("🔐 Getting Auth Token...");
-    console.log("  - Token from URL:", getTokenFromUrl()?.substring(0, 20) + "...");
-    
+    console.log(
+      "  - Token from URL:",
+      getTokenFromUrl()?.substring(0, 20) + "..."
+    );
+
     const authFromStorage = localStorage.getItem("auth");
-    console.log("  - Auth from localStorage:", authFromStorage ? "Found" : "Not found");
-    
+    console.log(
+      "  - Auth from localStorage:",
+      authFromStorage ? "Found" : "Not found"
+    );
+
     if (token) {
       headers["Authorization"] = token;
-      console.log("  - ✅ Token added to headers:", token.substring(0, 20) + "...");
+      console.log(
+        "  - ✅ Token added to headers:",
+        token.substring(0, 20) + "..."
+      );
     } else {
       console.log("  - ⚠️ No token found!");
     }
@@ -98,7 +108,7 @@ class ApiService {
       }
 
       const data = await response.json();
-      
+
       console.group(`✅ API Data: ${endpoint}`);
       console.log("📦 Data:", data);
       console.log("📝 Data Count:", data.data?.length || 0);
@@ -164,7 +174,9 @@ type FilterData = ProjectData | SprintData | EmployeeData | YearData;
 
 // ==================== Custom Hook for API Data ====================
 function useApiData(endpoint: string) {
-  const [data, setData] = React.useState<{ id: string; name: string | number }[]>([]);
+  const [data, setData] = React.useState<
+    { id: string; name: string | number }[]
+  >([]);
   const [loading, setLoading] = React.useState<boolean>(true);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -173,27 +185,30 @@ function useApiData(endpoint: string) {
 
     const fetchData = async () => {
       console.log(`\n🚀 [useApiData] Starting fetch for: ${endpoint}`);
-      
+
       setLoading(true);
       setError(null);
 
       try {
-        const response = await apiService.fetch<ApiResponse<FilterData>>(endpoint);
+        const response = await apiService.fetch<ApiResponse<FilterData>>(
+          endpoint
+        );
 
         if (isMounted) {
           const transformedData = response.data.map((item) => ({
             id: item.id,
             name: item.name,
           }));
-          
+
           console.log(`✅ [useApiData] Data transformed:`, transformedData);
           setData(transformedData);
         }
       } catch (err) {
         console.error(`❌ [useApiData] Fetch failed:`, err);
-        
+
         if (isMounted) {
-          const errorMessage = err instanceof Error ? err.message : "Failed to fetch data";
+          const errorMessage =
+            err instanceof Error ? err.message : "Failed to fetch data";
           setError(errorMessage);
           console.error(`🔴 [useApiData] Error message:`, errorMessage);
         }
@@ -237,7 +252,7 @@ export function FilterSelect({
   // Filter data berdasarkan search query
   const filteredData = React.useMemo(() => {
     if (!searchQuery.trim()) return data;
-    
+
     const query = searchQuery.toLowerCase();
     return data.filter((item) => {
       const name = String(item.name).toLowerCase();
@@ -263,7 +278,11 @@ export function FilterSelect({
 
   return (
     <div className="relative">
-      <Select value={selected} onValueChange={handleSelect} disabled={isDisabled}>
+      <Select
+        value={selected}
+        onValueChange={handleSelect}
+        disabled={isDisabled}
+      >
         <SelectTrigger
           className={`w-[250px] bg-white text-gray-500 flex items-center justify-between ${
             selected ? "font-medium" : "text-gray-400"
@@ -312,7 +331,7 @@ export function FilterSelect({
               )}
 
               {/* Filtered Results */}
-              <div className="max-h-[300px] overflow-y-auto">
+              <div className="max-h-[200px] overflow-y-auto">
                 {filteredData.length === 0 ? (
                   <SelectItem value="no-results" disabled>
                     {searchQuery ? "No results found" : "No data available"}
