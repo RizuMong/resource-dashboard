@@ -57,7 +57,7 @@ export function ProductivitySection({ data }: ProductivitySectionProps) {
   return (
     <div className="border rounded-xl bg-white p-6">
       <h2 className="text-lg font-semibold text-gray-800 mb-4">
-        Productivity Overview
+        Productivity Overview (Coming Soon)
       </h2>
 
       <div className="h-[360px] w-full">
