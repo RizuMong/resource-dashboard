@@ -265,7 +265,7 @@ export function FilterSelect({
     <div className="relative">
       <Select value={selected} onValueChange={handleSelect} disabled={isDisabled}>
         <SelectTrigger
-          className={`w-[300px] bg-white text-gray-500 flex items-center justify-between ${
+          className={`w-[250px] bg-white text-gray-500 flex items-center justify-between ${
             selected ? "font-medium" : "text-gray-400"
           }`}
         >
