@@ -32,6 +32,8 @@ export default function DashboardPage() {
   const [productivityData, setProductivityData] = useState<ProductivityData[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const chartYear = filters.year?.name ?? filters.year?.id ?? new Date().getFullYear();
+
   // Ambil token dari URL dan simpan ke localStorage
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -190,7 +192,7 @@ export default function DashboardPage() {
         </Button>
       </div>
 
-      <ChartSection data={chartData} />
+    <ChartSection data={chartData} year={chartYear} />
       <ProductivitySection data={productivityData} />
 
     </div>

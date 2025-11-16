@@ -1,3 +1,4 @@
+// components/ChartSection.tsx
 "use client";
 
 import {
@@ -18,37 +19,49 @@ interface ChartSectionProps {
     plan: number;
     capacity: number;
   }[];
+  year?: number | string;
 }
 
-export function ChartSection({ data }: ChartSectionProps) {
+export function ChartSection({ data, year }: ChartSectionProps) {
+  // If year prop not provided, fallback ke current year
+  const displayYear = year ?? new Date().getFullYear();
+
   // Mock data kalau tidak ada data dari props
   const mockData = [
     { name: "Jan", plan: 0, capacity: 0 },
-    { name: "Feb", plan:  0, capacity: 0 },
-    { name: "Mar", plan:  0, capacity: 0 },
-    { name: "Apr", plan:  0, capacity: 0 },
-    { name: "May", plan:  0, capacity: 0 },
-    { name: "Jun", plan:  0, capacity: 0 },
-    { name: "Jul", plan:  0, capacity: 0 },
-    { name: "Aug", plan:  0, capacity: 0 },
-    { name: "Sep", plan:  0, capacity: 0 },
-    { name: "Oct", plan:  0, capacity: 0 },
-    { name: "Nov", plan:  0, capacity: 0 },
-    { name: "Dec", plan:  0, capacity: 0 },
+    { name: "Feb", plan: 0, capacity: 0 },
+    { name: "Mar", plan: 0, capacity: 0 },
+    { name: "Apr", plan: 0, capacity: 0 },
+    { name: "May", plan: 0, capacity: 0 },
+    { name: "Jun", plan: 0, capacity: 0 },
+    { name: "Jul", plan: 0, capacity: 0 },
+    { name: "Aug", plan: 0, capacity: 0 },
+    { name: "Sep", plan: 0, capacity: 0 },
+    { name: "Oct", plan: 0, capacity: 0 },
+    { name: "Nov", plan: 0, capacity: 0 },
+    { name: "Dec", plan: 0, capacity: 0 },
   ];
 
   const chartData = data && data.length > 0 ? data : mockData;
 
   const barColors = {
-    plan: "#FACC15", // warm natural yellow (amber-400)
-    capacity: "#60A5FA", // soft corporate blue (blue-400)
+    plan: "#FACC15", // amber
+    capacity: "#60A5FA", // blue
   };
+
+  // Determine whether real data exists (not just mock)
+  const hasRealData = Boolean(data && data.length > 0);
 
   return (
     <div className="border rounded-xl bg-white p-6">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">
-        Resource Planning
-      </h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-gray-800">
+          Resource Planning{" "}
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
+            {displayYear}
+          </span>
+        </h2>
+      </div>
 
       <div className="h-[360px] w-full">
         <ResponsiveContainer width="100%" height="100%">
@@ -90,7 +103,6 @@ export function ChartSection({ data }: ChartSectionProps) {
               iconSize={10}
             />
 
-            {/* Total Plan Bar */}
             <Bar
               dataKey="plan"
               name="Total Plan"
@@ -110,7 +122,6 @@ export function ChartSection({ data }: ChartSectionProps) {
               />
             </Bar>
 
-            {/* Total Capacity Bar */}
             <Bar
               dataKey="capacity"
               name="Total Capacity"
@@ -133,10 +144,10 @@ export function ChartSection({ data }: ChartSectionProps) {
         </ResponsiveContainer>
       </div>
 
-      {chartData.length === 0 && (
-        <div className="flex items-center justify-center h-full">
+      {!hasRealData && (
+        <div className="flex items-center justify-center h-20 mt-4">
           <p className="text-gray-400 text-sm">
-            No data available. Please apply filters.
+            No data available for {displayYear}. Please apply filters.
           </p>
         </div>
       )}
