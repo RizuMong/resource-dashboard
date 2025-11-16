@@ -14,7 +14,7 @@ interface FilterSelectProps {
   label: string;
   mockData: { id: string; name: string }[];
   onChange?: (value: { id: string; name: string } | null) => void;
-}
+};
 
 export function FilterSelect({ label, mockData, onChange }: FilterSelectProps) {
   const [selected, setSelected] = React.useState<string>("");
@@ -39,10 +39,7 @@ export function FilterSelect({ label, mockData, onChange }: FilterSelectProps) {
             selected ? "font-medium" : "text-gray-200"
           }`}
         >
-          {/* ✅ tampilkan value / placeholder */}
           <SelectValue placeholder={label} />
-
-          {/* ❌ tombol clear — tidak menumpuk dropdown */}
           {selected && (
             <button
               type="button"
