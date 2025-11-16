@@ -23,18 +23,18 @@ interface ChartSectionProps {
 export function ChartSection({ data }: ChartSectionProps) {
   // Mock data kalau tidak ada data dari props
   const mockData = [
-    { name: "Jan", plan: 90, capacity: 120 },
-    { name: "Feb", plan: 100, capacity: 130 },
-    { name: "Mar", plan: 150, capacity: 180 },
-    { name: "Apr", plan: 130, capacity: 150 },
-    { name: "May", plan: 160, capacity: 200 },
-    { name: "Jun", plan: 140, capacity: 190 },
-    { name: "Jul", plan: 120, capacity: 160 },
-    { name: "Aug", plan: 180, capacity: 210 },
-    { name: "Sep", plan: 170, capacity: 200 },
-    { name: "Oct", plan: 190, capacity: 220 },
-    { name: "Nov", plan: 175, capacity: 210 },
-    { name: "Dec", plan: 200, capacity: 240 },
+    { name: "Jan", plan: 0, capacity: 0 },
+    { name: "Feb", plan:  0, capacity: 0 },
+    { name: "Mar", plan:  0, capacity: 0 },
+    { name: "Apr", plan:  0, capacity: 0 },
+    { name: "May", plan:  0, capacity: 0 },
+    { name: "Jun", plan:  0, capacity: 0 },
+    { name: "Jul", plan:  0, capacity: 0 },
+    { name: "Aug", plan:  0, capacity: 0 },
+    { name: "Sep", plan:  0, capacity: 0 },
+    { name: "Oct", plan:  0, capacity: 0 },
+    { name: "Nov", plan:  0, capacity: 0 },
+    { name: "Dec", plan:  0, capacity: 0 },
   ];
 
   const chartData = data && data.length > 0 ? data : mockData;

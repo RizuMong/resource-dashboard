@@ -27,18 +27,18 @@ export function ProductivitySection({ data }: ProductivitySectionProps) {
   // Mock data bawaan (Jan - Dec)
   const mockData = useMemo(
     () => [
-      { name: "Jan", actual: 89, plan: 200 },
-      { name: "Feb", actual: 120, plan: 210 },
-      { name: "Mar", actual: 140, plan: 230 },
-      { name: "Apr", actual: 150, plan: 220 },
-      { name: "May", actual: 170, plan: 240 },
-      { name: "Jun", actual: 130, plan: 210 },
-      { name: "Jul", actual: 160, plan: 230 },
-      { name: "Aug", actual: 150, plan: 225 },
-      { name: "Sep", actual: 145, plan: 215 },
-      { name: "Oct", actual: 160, plan: 220 },
-      { name: "Nov", actual: 130, plan: 200 },
-      { name: "Dec", actual: 140, plan: 210 },
+      { name: "Jan", actual: 0, plan: 0 },
+      { name: "Feb", actual: 0, plan: 0 },
+      { name: "Mar", actual: 0, plan: 0 },
+      { name: "Apr", actual: 0, plan: 0 },
+      { name: "May", actual: 0, plan: 0 },
+      { name: "Jun", actual: 0, plan: 0 },
+      { name: "Jul", actual: 0, plan: 0 },
+      { name: "Aug", actual: 0, plan: 0 },
+      { name: "Sep", actual: 0, plan: 0 },
+      { name: "Oct", actual: 0, plan: 0 },
+      { name: "Nov", actual: 0, plan: 0 },
+      { name: "Dec", actual: 0, plan: 0 },
     ],
     []
   );
