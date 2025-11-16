@@ -165,11 +165,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen space-y-8">
-
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-      </div>
-
       <div className="flex flex-wrap items-end gap-4 bg-white p-4 rounded-xl border">
         <FilterSelect label="Select Person" endpoint={API_CONFIG.endpoints.employee} onChange={(v) => handleFilterChange("person", v)} />
         <FilterSelect label="Select Project" endpoint={API_CONFIG.endpoints.project} onChange={(v) => handleFilterChange("project", v)} />
