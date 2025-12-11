@@ -1267,6 +1267,9 @@ export default function DashboardPage() {
                                                     {pp.project_id?.name ?? "-"}
                                                   </td>
                                                   <td className="px-4 py-3 text-right font-medium text-gray-900">
+                                                    {row.capacity ?? 0}
+                                                  </td>
+                                                  <td className="px-4 py-3 text-right font-medium text-gray-900">
                                                     {pp.plan ?? 0}
                                                   </td>
                                                   <td className="px-4 py-3 text-right font-medium text-gray-900">
