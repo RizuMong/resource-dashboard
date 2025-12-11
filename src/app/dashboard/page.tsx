@@ -367,8 +367,8 @@ export default function DashboardPage() {
 
       const prod = apiData.map((it: any) => ({
         name: it.name ?? `Month ${it.month ?? ""}`,
-        plan: Math.round(Number(it.plan ?? 0)),
-        actual: Math.round(Number(it.actual ?? 0)),
+        plan: Number(it.plan ?? 0),
+        actual: Number(it.actual ?? 0),
         month: it.month+1,
         year: yearValue
       }));
@@ -1184,14 +1184,14 @@ export default function DashboardPage() {
 
                               <td className="px-6 py-4 text-right align-top">
                                 <div className="text-sm font-medium text-gray-900">
-                                  {Math.round(row.plan ?? 0)}
+                                  {row.plan ?? 0}
                                 </div>
                               </td>
 
 
                               <td className="px-6 py-4 text-right align-top">
                                 <div className="text-sm font-medium text-gray-900">
-                                  {Math.round(row.actual ?? 0)}
+                                  {row.actual ?? 0}
                                 </div>
                               </td>
                             </tr>
@@ -1234,10 +1234,10 @@ export default function DashboardPage() {
                                                     {pp.project_id?.name ?? "-"}
                                                   </td>
                                                   <td className="px-4 py-3 text-right font-medium text-gray-900">
-                                                    {Math.round(pp.plan ?? 0)}
+                                                    {pp.plan ?? 0}
                                                   </td>
                                                   <td className="px-4 py-3 text-right font-medium text-gray-900">
-                                                    {Math.round(pp.actual ?? 0)}
+                                                    {pp.actual ?? 0}
                                                   </td>
                                                 </tr>
                                               )
