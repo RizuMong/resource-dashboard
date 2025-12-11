@@ -1243,6 +1243,9 @@ export default function DashboardPage() {
                                               Project Name
                                             </th>
                                             <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 w-36">
+                                              Capacity
+                                            </th>
+                                            <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 w-36">
                                               SA Plan
                                             </th>
                                             <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 w-36">
