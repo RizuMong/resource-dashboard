@@ -370,7 +370,8 @@ export default function DashboardPage() {
         plan: Number(it.plan ?? 0),
         actual: Number(it.actual ?? 0),
         month: it.month+1,
-        year: yearValue
+        year: yearValue,
+        id: it.planningId
       }));
       setProductivityData(prod);
     } catch (err) {
