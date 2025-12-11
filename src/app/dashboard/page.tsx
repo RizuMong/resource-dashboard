@@ -1103,7 +1103,7 @@ export default function DashboardPage() {
                           }}
                         >
                           <div className="flex items-center justify-end gap-2">
-                            <span className="font-semibold">Total SA Plan</span>
+                            <span className="font-semibold">Total Capacity</span>
                             {sortKey === "plan" &&
                               (sortDir === "asc" ? (
                                 <span>▲</span>
