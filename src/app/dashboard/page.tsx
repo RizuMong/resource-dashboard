@@ -1242,9 +1242,9 @@ export default function DashboardPage() {
                                             <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
                                               Project Name
                                             </th>
-                                            <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 w-36">
+                                            {/* <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 w-36">
                                               Capacity
-                                            </th>
+                                            </th> */}
                                             <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 w-36">
                                               SA Plan
                                             </th>
@@ -1269,9 +1269,9 @@ export default function DashboardPage() {
                                                   <td className="px-4 py-3 text-gray-800">
                                                     {pp.project_id?.name ?? "-"}
                                                   </td>
-                                                  <td className="px-4 py-3 text-right font-medium text-gray-900">
+                                                  {/* <td className="px-4 py-3 text-right font-medium text-gray-900">
                                                     {row.capacity ?? 0}
-                                                  </td>
+                                                  </td> */}
                                                   <td className="px-4 py-3 text-right font-medium text-gray-900">
                                                     {pp.plan ?? 0}
                                                   </td>
