@@ -21,6 +21,7 @@ interface ProductivityData {
   plan: number;
   month?: number;
   year?: number;
+  id?: string;
 }
 
 
@@ -34,18 +35,18 @@ export function ProductivitySection({ data, onBarClick }: ProductivitySectionPro
   // Mock data bawaan (Jan - Dec)
   const mockData = useMemo(
     () => [
-      { name: "January", actual: 0, plan: 0, month: 1 },
-      { name: "February", actual: 0, plan: 0, month: 2 },
-      { name: "March", actual: 0, plan: 0, month: 3 },
-      { name: "April", actual: 0, plan: 0, month: 4 },
-      { name: "May", actual: 0, plan: 0, month: 5 },
-      { name: "June", actual: 0, plan: 0, month: 6 },
-      { name: "July", actual: 0, plan: 0, month: 7 },
-      { name: "August", actual: 0, plan: 0, month: 8 },
-      { name: "September", actual: 0, plan: 0, month: 9 },
-      { name: "October", actual: 0, plan: 0, month: 10 },
-      { name: "November", actual: 0, plan: 0, month: 11 },
-      { name: "December", actual: 0, plan: 0, month: 12 },
+      { name: "January", actual: 0, plan: 0, month: 1, id:"" },
+      { name: "February", actual: 0, plan: 0, month: 2, id:""  },
+      { name: "March", actual: 0, plan: 0, month: 3, id:""  },
+      { name: "April", actual: 0, plan: 0, month: 4, id:""  },
+      { name: "May", actual: 0, plan: 0, month: 5, id:""  },
+      { name: "June", actual: 0, plan: 0, month: 6, id:""  },
+      { name: "July", actual: 0, plan: 0, month: 7, id:""  },
+      { name: "August", actual: 0, plan: 0, month: 8, id:""  },
+      { name: "September", actual: 0, plan: 0, month: 9, id:""  },
+      { name: "October", actual: 0, plan: 0, month: 10, id:""  },
+      { name: "November", actual: 0, plan: 0, month: 11, id:""  },
+      { name: "December", actual: 0, plan: 0, month: 12, id:""  },
     ],
     []
   );

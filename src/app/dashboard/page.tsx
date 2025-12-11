@@ -469,7 +469,7 @@ export default function DashboardPage() {
   }
 
 
-  async function fetchProductivityDetail(month?: number, year?: number) {
+  async function fetchProductivityDetail(month?: number, year?: number, planId?: string) {
     if (typeof month === "undefined") {
       setDetailError("Missing month");
       setProductivityDetailData(null);
@@ -490,6 +490,7 @@ export default function DashboardPage() {
       const params = new URLSearchParams();
       params.append("month", String(month-1));
       params.append("year", String(year));
+      params.append("planId", String(planId))
 
 
       const f = filtersRef.current;
@@ -551,10 +552,11 @@ export default function DashboardPage() {
     console.log("Productivity bar clicked:", payload);
     const month = payload.month;
     const year = payload.year;
+    const planId = payload.id
     setSelectedContext({ month });
     setIsProductivityModal(true);
     setModalOpen(true);
-    fetchProductivityDetail(month, year);
+    fetchProductivityDetail(month, year, planId);
   };
 
 
