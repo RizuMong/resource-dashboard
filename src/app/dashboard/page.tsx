@@ -65,6 +65,7 @@ interface ProductivityDetailItem {
   project_plans?: ProductivityProjectPlan[];
   role?: string;
   year?: number;
+  capacity?:number;
 }
 
 
@@ -1089,6 +1090,29 @@ export default function DashboardPage() {
                           </div>
                         </th>
 
+                        {/* Capacity */}
+                        <th
+                          className="px-6 py-3 text-right cursor-pointer w-32"
+                          onClick={() => {
+                            setSortKey("plan");
+                            setSortDir(
+                              sortKey === "capacity" && sortDir === "asc"
+                                ? "desc"
+                                : "asc"
+                            );
+                          }}
+                        >
+                          <div className="flex items-center justify-end gap-2">
+                            <span className="font-semibold">Total SA Plan</span>
+                            {sortKey === "plan" &&
+                              (sortDir === "asc" ? (
+                                <span>▲</span>
+                              ) : (
+                                <span>▼</span>
+                              ))}
+                          </div>
+                        </th>
+
 
                         {/* Plan */}
                         <th
@@ -1181,6 +1205,12 @@ export default function DashboardPage() {
                               <td className="px-6 py-4 align-top">
                                 <div className="text-sm text-gray-700">
                                   {row.role ?? "-"}
+                                </div>
+                              </td>
+
+                              <td className="px-6 py-4 text-right align-top">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {row.capacity ?? 0}
                                 </div>
                               </td>
 
