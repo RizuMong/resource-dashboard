@@ -130,7 +130,7 @@ export function ProductivitySection({ data, onBarClick }: ProductivitySectionPro
               {/* Total Actual */}
               <Bar
                 dataKey="actual"
-                name="Total Actual"
+                name="Total Actual (MD)"
                 fill={barColors.actual}
                 radius={[6, 6, 0, 0]}
                 isAnimationActive={true}
@@ -155,7 +155,7 @@ export function ProductivitySection({ data, onBarClick }: ProductivitySectionPro
               {/* Total SA Plan */}
               <Bar
                 dataKey="plan"
-                name="Total SA Plan"
+                name="Total SA Plan (MD)"
                 fill={barColors.plan}
                 radius={[6, 6, 0, 0]}
                 isAnimationActive={true}

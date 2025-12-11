@@ -73,7 +73,7 @@ export default function DashboardPage() {
   const [filters, setFilters] = useState({
     person: null as { id: string; name: string } | null,
     project: null as { id: string; name: string } | null,
-    sprint: null as { id: string; name: string } | null,
+    // sprint: null as { id: string; name: string } | null,
     year: null as { id: string | number; name: string | number } | null,
   });
 
@@ -257,7 +257,7 @@ export default function DashboardPage() {
       const f = filtersRef.current;
       if (f.person?.id) params.append("employee_id", f.person.id);
       if (f.project?.id) params.append("project_id", f.project.id);
-      if (f.sprint?.id) params.append("sprint_id", f.sprint.id);
+      // if (f.sprint?.id) params.append("sprint_id", f.sprint.id);
 
 
       const finalUrl = `${API_CONFIG.baseUrl.replace(
@@ -333,7 +333,7 @@ export default function DashboardPage() {
       const f = filtersRef.current;
       if (f.person?.id) params.append("employee_id", f.person.name);
       if (f.project?.id) params.append("project_id", f.project.id);
-      if (f.sprint?.id) params.append("sprint_id", f.sprint.id);
+      // if (f.sprint?.id) params.append("sprint_id", f.sprint.id);
 
 
       const finalUrl = `${API_CONFIG.baseUrl.replace(
@@ -429,7 +429,7 @@ export default function DashboardPage() {
       const f = filtersRef.current;
       if (f.person?.id) params.append("employee_id", f.person.id);
       if (f.project?.id) params.append("project_id", f.project.id);
-      if (f.sprint?.id) params.append("sprint_id", f.sprint.id);
+      // if (f.sprint?.id) params.append("sprint_id", f.sprint.id);
 
 
       const url = `${API_CONFIG.baseUrl.replace(
@@ -498,7 +498,7 @@ export default function DashboardPage() {
       const f = filtersRef.current;
       if (f.person?.id) params.append("employee_id", f.person.id);
       if (f.project?.id) params.append("project_id", f.project.id);
-      if (f.sprint?.id) params.append("sprint_id", f.sprint.id);
+      // if (f.sprint?.id) params.append("sprint_id", f.sprint.id);
 
 
       const url = `${API_CONFIG.baseUrl.replace(
@@ -589,11 +589,11 @@ export default function DashboardPage() {
         />
 
 
-        <FilterSelect
+        {/* <FilterSelect
           label="Select Sprint"
           endpoint={API_CONFIG.endpoints.sprint}
           onChange={(v) => handleFilterChange("sprint", v)}
-        />
+        /> */}
 
 
         <FilterSelect

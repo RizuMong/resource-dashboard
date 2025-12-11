@@ -115,7 +115,7 @@ export function ChartSection({ data, year, onBarClick }: ChartSectionProps) {
 
             <Bar
               dataKey="plan"
-              name="Total Plan"
+              name="Total Plan (MD)"
               fill={barColors.plan}
               radius={[6, 6, 0, 0]}
               onClick={handleBarClick}
@@ -135,7 +135,7 @@ export function ChartSection({ data, year, onBarClick }: ChartSectionProps) {
 
             <Bar
               dataKey="capacity"
-              name="Total Capacity"
+              name="Total Capacity (MD)"
               fill={barColors.capacity}
               radius={[6, 6, 0, 0]}
               onClick={handleBarClick}
