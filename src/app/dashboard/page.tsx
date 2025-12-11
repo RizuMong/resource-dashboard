@@ -1233,7 +1233,7 @@ export default function DashboardPage() {
                             {/* Expanded project plans */}
                             {isOpen && (
                               <tr className="bg-gray-50">
-                                <td colSpan={6} className="px-6 py-3">
+                                <td colSpan={7} className="px-6 py-3">
                                   <div className="p-0 border rounded">
                                     <div className="overflow-x-auto">
                                       <table className="w-full table-auto">
