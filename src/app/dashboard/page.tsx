@@ -1100,7 +1100,7 @@ export default function DashboardPage() {
                           }}
                         >
                           <div className="flex items-center justify-end gap-2">
-                            <span className="font-semibold">Total Plan</span>
+                            <span className="font-semibold">Total SA Plan</span>
                             {sortKey === "plan" &&
                               (sortDir === "asc" ? (
                                 <span>▲</span>
@@ -1210,7 +1210,7 @@ export default function DashboardPage() {
                                               Project Name
                                             </th>
                                             <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 w-36">
-                                              Plan
+                                              SA Plan
                                             </th>
                                             <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 w-36">
                                               Actual
