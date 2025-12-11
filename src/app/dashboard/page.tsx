@@ -1,5 +1,6 @@
 "use client";
 
+
 import React from "react";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { FilterSelect } from "./components/FilterSelect";
@@ -9,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, X } from "lucide-react";
 import { API_CONFIG } from "@/lib/api";
 
+
 interface ChartData {
   id?: string;
   month?: number;
@@ -17,6 +19,7 @@ interface ChartData {
   capacity: number;
 }
 
+
 interface ProjectPlan {
   plan: number;
   project_id: {
@@ -24,6 +27,7 @@ interface ProjectPlan {
     name: string;
   };
 }
+
 
 interface DetailResponseItem {
   capacity?: number;
@@ -39,6 +43,31 @@ interface DetailResponseItem {
   year?: number;
 }
 
+
+interface ProductivityProjectPlan {
+  plan: number;
+  actual: number;
+  project_id: {
+    id: string;
+    name: string;
+  };
+}
+
+
+interface ProductivityDetailItem {
+  actual?: number;
+  employee_email?: string;
+  employee_name?: string;
+  id?: string;
+  month_name?: string;
+  month_number?: number;
+  plan?: number;
+  project_plans?: ProductivityProjectPlan[];
+  role?: string;
+  year?: number;
+}
+
+
 export default function DashboardPage() {
   const [filters, setFilters] = useState({
     person: null as { id: string; name: string } | null,
@@ -47,21 +76,27 @@ export default function DashboardPage() {
     year: null as { id: string | number; name: string | number } | null,
   });
 
+
   // keep ref to avoid stale closure when building params
   const filtersRef = useRef(filters);
   useEffect(() => {
     filtersRef.current = filters;
   }, [filters]);
 
+
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [productivityData, setProductivityData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+
 
   // modal + detail states
   const [modalOpen, setModalOpen] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
   const [detailData, setDetailData] = useState<DetailResponseItem[] | null>(
+    null
+  );
+  const [productivityDetailData, setProductivityDetailData] = useState<ProductivityDetailItem[] | null>(
     null
   );
   const [selectedContext, setSelectedContext] = useState<{
@@ -71,15 +106,20 @@ export default function DashboardPage() {
     year?: number;
   } | null>(null);
 
+
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
+
   const [sortKey, setSortKey] = useState<
-    "employee_name" | "employee_email" | "role" | "plan" | "capacity" | "status"
+    "employee_name" | "employee_email" | "role" | "plan" | "capacity" | "status" | "actual"
   >("employee_name");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [isProductivityModal, setIsProductivityModal] = useState(false);
+
 
   const chartYear =
     filters.year?.name ?? filters.year?.id ?? new Date().getFullYear();
+
 
   const toggleRow = (id?: string) => {
     if (!id) return;
@@ -91,12 +131,13 @@ export default function DashboardPage() {
     });
   };
 
+
   const sortedDetailData = useMemo(() => {
     if (!detailData) return [];
     const copy = [...detailData];
-    copy.sort((a: any, b: any) => {
-      const aVal = a[sortKey] ?? "";
-      const bVal = b[sortKey] ?? "";
+    copy.sort((a, b) => {
+      const aVal = (a as any)[sortKey] ?? "";
+      const bVal = (b as any)[sortKey] ?? "";
       // numeric fields
       if (sortKey === "plan" || sortKey === "capacity") {
         const na = Number(aVal || 0),
@@ -113,8 +154,35 @@ export default function DashboardPage() {
     return copy;
   }, [detailData, sortKey, sortDir]);
 
+
+  const sortedProductivityDetailData = useMemo(() => {
+    if (!productivityDetailData) return [];
+    const copy = [...productivityDetailData];
+    copy.sort((a, b) => {
+      const aVal = (a as any)[sortKey] ?? "";
+      const bVal = (b as any)[sortKey] ?? "";
+      // numeric fields
+      if (sortKey === "plan" || sortKey === "actual") {
+        const na = Number(aVal || 0),
+          nb = Number(bVal || 0);
+        return sortDir === "asc" ? na - nb : nb - na;
+      }
+      // string compare
+      const sa = String(aVal).toLowerCase();
+      const sb = String(bVal).toLowerCase();
+      if (sa < sb) return sortDir === "asc" ? -1 : 1;
+      if (sa > sb) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+    return copy;
+  }, [productivityDetailData, sortKey, sortDir]);
+
+
   // helper to get token (localStorage or url)
   const getAuthToken = (): string => {
+    // return process.env.NEXT_PUBLIC_TOKEN || "";
+
+
     if (typeof window === "undefined") return "";
     try {
       const raw = localStorage.getItem("auth");
@@ -131,9 +199,11 @@ export default function DashboardPage() {
     }
   };
 
+
   // unified mount: save token (if any), set default year, fetch data AFTER token saved
   useEffect(() => {
     if (typeof window === "undefined") return;
+
 
     (async () => {
       const params = new URLSearchParams(window.location.search);
@@ -152,15 +222,18 @@ export default function DashboardPage() {
         window.history.replaceState({}, "", url.toString());
       }
 
+
       const currentYear = new Date().getFullYear();
       setFilters((p) => ({
         ...p,
         year: { id: String(currentYear), name: currentYear },
       }));
       await fetchDataForYear(currentYear);
+      await fetchProductivityDataForYear(currentYear);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
 
   // fetch list (resource-planning)
   async function fetchDataForYear(yearValue: string | number) {
@@ -174,14 +247,17 @@ export default function DashboardPage() {
         return;
       }
 
+
       const yearStr = String(yearValue);
       const params = new URLSearchParams();
       params.append("year", yearStr);
+
 
       const f = filtersRef.current;
       if (f.person?.id) params.append("employee_id", f.person.id);
       if (f.project?.id) params.append("project_id", f.project.id);
       if (f.sprint?.id) params.append("sprint_id", f.sprint.id);
+
 
       const finalUrl = `${API_CONFIG.baseUrl.replace(
         /\/+$/,
@@ -189,24 +265,29 @@ export default function DashboardPage() {
       )}/project-management/dashboard/resource-planning?${params.toString()}`;
       console.log("Fetching list:", finalUrl);
 
+
       const response = await fetch(finalUrl, {
         method: "POST",
         headers: { Authorization: token },
       });
 
+
       const result = await response.json();
+
 
       if (!response.ok) {
         throw new Error(result?.message || "Failed to fetch list");
       }
 
+
       const apiData: any[] = result?.data ?? [];
+
 
       if (!apiData.length) {
         setChartData([]);
-        setProductivityData([]);
         return;
       }
+
 
       const formatted: ChartData[] = apiData.map((it: any) => ({
         id: it.id,
@@ -216,22 +297,90 @@ export default function DashboardPage() {
         capacity: Number(it.capacity ?? 0),
       }));
 
+
       setChartData(formatted);
+
+
+
+
+    } catch (err) {
+      console.error("Fetch list error:", err);
+      setChartData([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+
+  // fetch list (productivity)
+  async function fetchProductivityDataForYear(yearValue: string | number) {
+    setLoading(true);
+    try {
+      const token = getAuthToken();
+      if (!token) {
+        console.warn("Token missing - abort fetch");
+        setProductivityData([]);
+        return;
+      }
+
+
+      const yearStr = String(yearValue);
+      const params = new URLSearchParams();
+      params.append("year", yearStr);
+
+
+      const f = filtersRef.current;
+      if (f.person?.id) params.append("employee_id", f.person.name);
+      if (f.project?.id) params.append("project_id", f.project.id);
+      if (f.sprint?.id) params.append("sprint_id", f.sprint.id);
+
+
+      const finalUrl = `${API_CONFIG.baseUrl.replace(
+        /\/+$/,
+        ""
+      )}/project-management/dashboard/productivity-overview?${params.toString()}`;
+      console.log("Fetching list:", finalUrl);
+
+
+      const response = await fetch(finalUrl, {
+        method: "POST",
+        headers: { Authorization: token },
+      });
+
+
+      const result = await response.json();
+
+
+      if (!response.ok) {
+        throw new Error(result?.message || "Failed to fetch list");
+      }
+
+
+      const apiData: any[] = result?.data ?? [];
+
+
+      if (!apiData.length) {
+        setProductivityData([]);
+        return;
+      }
+
 
       const prod = apiData.map((it: any) => ({
         name: it.name ?? `Month ${it.month ?? ""}`,
-        plan: 0,
-        actual: 0,
+        plan: Math.round(Number(it.plan ?? 0)),
+        actual: Math.round(Number(it.actual ?? 0)),
+        month: it.month+1,
+        year: yearValue
       }));
       setProductivityData(prod);
     } catch (err) {
       console.error("Fetch list error:", err);
-      setChartData([]);
       setProductivityData([]);
     } finally {
       setLoading(false);
     }
   }
+
 
   const handleFilterChange = (
     key: string,
@@ -240,13 +389,16 @@ export default function DashboardPage() {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
+
   const handleApplyFilters = async () => {
     if (!filters.year) {
       alert("Please select Year");
       return;
     }
     await fetchDataForYear(filters.year.name ?? filters.year.id);
+    await fetchProductivityDataForYear(filters.year.name ?? filters.year.id);
   };
+
 
   // fetch detail when a chart bar clicked
   async function fetchDetail(id?: string, month?: number) {
@@ -256,22 +408,27 @@ export default function DashboardPage() {
       return;
     }
 
+
     setDetailLoading(true);
     setDetailError(null);
     setDetailData(null);
+
 
     try {
       const token = getAuthToken();
       if (!token) throw new Error("Token not found");
 
+
       const params = new URLSearchParams();
       params.append("id", id);
       params.append("month", String(month));
+
 
       const f = filtersRef.current;
       if (f.person?.id) params.append("employee_id", f.person.id);
       if (f.project?.id) params.append("project_id", f.project.id);
       if (f.sprint?.id) params.append("sprint_id", f.sprint.id);
+
 
       const url = `${API_CONFIG.baseUrl.replace(
         /\/+$/,
@@ -279,17 +436,21 @@ export default function DashboardPage() {
       )}/project-management/dashboard/resource-planning/details?${params.toString()}`;
       console.log("Fetching detail:", url);
 
+
       const response = await fetch(url, {
         method: "POST",
         headers: { Authorization: token },
       });
 
+
       const result = await response.json();
       if (!response.ok)
         throw new Error(result?.message || "Failed to fetch details");
 
+
       const d: DetailResponseItem[] = result?.data ?? [];
       setDetailData(d);
+
 
       if (d && d.length > 0) {
         setSelectedContext({
@@ -307,6 +468,74 @@ export default function DashboardPage() {
     }
   }
 
+
+  async function fetchProductivityDetail(month?: number, year?: number) {
+    if (typeof month === "undefined") {
+      setDetailError("Missing month");
+      setProductivityDetailData(null);
+      return;
+    }
+
+
+    setDetailLoading(true);
+    setDetailError(null);
+    setProductivityDetailData(null);
+
+
+    try {
+      const token = getAuthToken();
+      if (!token) throw new Error("Token not found");
+
+
+      const params = new URLSearchParams();
+      params.append("month", String(month-1));
+      params.append("year", String(year));
+
+
+      const f = filtersRef.current;
+      if (f.person?.id) params.append("employee_id", f.person.id);
+      if (f.project?.id) params.append("project_id", f.project.id);
+      if (f.sprint?.id) params.append("sprint_id", f.sprint.id);
+
+
+      const url = `${API_CONFIG.baseUrl.replace(
+        /\/+$/,
+        ""
+      )}/project-management/dashboard/productivity-details?${params.toString()}`;
+      console.log("Fetching detail:", url);
+
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { Authorization: token },
+      });
+
+
+      const result = await response.json();
+      if (!response.ok)
+        throw new Error(result?.message || "Failed to fetch details");
+
+
+      const d: ProductivityDetailItem[] = result?.data ?? [];
+      setProductivityDetailData(d);
+
+
+      if (d && d.length > 0) {
+        setSelectedContext({
+          month,
+          month_name: d[0]?.month_name,
+          year: d[0]?.year,
+        });
+      }
+    } catch (err: any) {
+      console.error("Detail fetch error:", err);
+      setDetailError(err?.message ?? "Failed to fetch details");
+    } finally {
+      setDetailLoading(false);
+    }
+  }
+
+
   // called by ChartSection when a bar is clicked
   const onChartBarClick = (payload: ChartData) => {
     // require id & month from payload
@@ -315,12 +544,29 @@ export default function DashboardPage() {
     fetchDetail(payload.id, payload.month);
   };
 
+
+  // called by ProductivitySection when a bar is clicked
+  const onProductivityBarClick = (payload: any) => {
+    // extract month from payload (assuming payload has month property)
+    console.log("Productivity bar clicked:", payload);
+    const month = payload.month;
+    const year = payload.year;
+    setSelectedContext({ month });
+    setIsProductivityModal(true);
+    setModalOpen(true);
+    fetchProductivityDetail(month, year);
+  };
+
+
   const closeModal = () => {
     setModalOpen(false);
     setDetailData(null);
+    setProductivityDetailData(null);
     setDetailError(null);
     setSelectedContext(null);
+    setIsProductivityModal(false);
   };
+
 
   return (
     <div className="min-h-screen space-y-8">
@@ -331,11 +577,13 @@ export default function DashboardPage() {
           onChange={(v) => handleFilterChange("person", v)}
         />
 
+
         <FilterSelect
           label="Select Project"
           endpoint={API_CONFIG.endpoints.project}
           onChange={(v) => handleFilterChange("project", v)}
         />
+
 
         <FilterSelect
           label="Select Sprint"
@@ -343,13 +591,16 @@ export default function DashboardPage() {
           onChange={(v) => handleFilterChange("sprint", v)}
         />
 
+
         <FilterSelect
           label="Select Year"
           endpoint={API_CONFIG.endpoints.year}
           onChange={(v) => handleFilterChange("year", v)}
         />
 
+
         <div className="flex-1"></div>
+
 
         <Button
           onClick={handleApplyFilters}
@@ -369,25 +620,31 @@ export default function DashboardPage() {
         </Button>
       </div>
 
+
       {/* IMPORTANT: pass onBarClick so ChartSection can notify page */}
       <ChartSection
         data={chartData}
         year={chartYear}
         onBarClick={onChartBarClick}
       />
-      <ProductivitySection data={productivityData} />
+      <ProductivitySection
+        data={productivityData}
+        onBarClick={onProductivityBarClick}
+      />
+
 
       {/* Modal (simple, no shadcn required) */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-start justify-center px-4 pt-10">
           <div className="absolute inset-0 bg-black/40" onClick={closeModal} />
 
+
           <div className="relative z-50 w-full max-w-7xl bg-white rounded-lg shadow-2xl p-6">
             {/* Header */}
             <div className="flex items-start justify-between gap-4 mb-4">
               <div>
                 <h3 className="text-2xl font-semibold text-gray-900">
-                  Detail Resource
+                  {isProductivityModal ? "Productivity Detail" : "Detail Resource"}
                 </h3>
                 <div className="text-sm text-gray-500 mt-1">
                   {selectedContext?.month_name
@@ -397,6 +654,7 @@ export default function DashboardPage() {
                     : `Month ${selectedContext?.month ?? "-"}`}
                 </div>
               </div>
+
 
               <div className="flex items-center gap-3">
                 <button
@@ -408,6 +666,7 @@ export default function DashboardPage() {
                 </button>
               </div>
             </div>
+
 
             {/* Content area */}
             <div>
@@ -424,16 +683,27 @@ export default function DashboardPage() {
               )}
               {!detailLoading &&
                 !detailError &&
+                !isProductivityModal &&
                 detailData &&
                 detailData.length === 0 && (
                   <div className="text-sm text-gray-600 py-6">
                     No detail data available for this month.
                   </div>
                 )}
+              {!detailLoading &&
+                !detailError &&
+                isProductivityModal &&
+                productivityDetailData &&
+                productivityDetailData.length === 0 && (
+                  <div className="text-sm text-gray-600 py-6">
+                    No productivity data available for this month.
+                  </div>
+                )}
             </div>
 
-            {/* Main table */}
-            {!detailLoading &&
+
+            {/* Main table - Resource Planning */}
+            {!isProductivityModal && !detailLoading &&
               !detailError &&
               detailData &&
               detailData.length > 0 && (
@@ -442,6 +712,7 @@ export default function DashboardPage() {
                     <thead className="sticky top-0 bg-white/90 backdrop-blur-sm z-10">
                       <tr className="text-sm text-gray-700 border-b">
                         <th className="px-6 py-3 w-12"></th>
+
 
                         {/* Full Name */}
                         <th
@@ -466,6 +737,7 @@ export default function DashboardPage() {
                           </div>
                         </th>
 
+
                         {/* Email */}
                         <th
                           className="px-6 py-3 text-left cursor-pointer"
@@ -489,6 +761,7 @@ export default function DashboardPage() {
                           </div>
                         </th>
 
+
                         {/* Role */}
                         <th
                           className="px-6 py-3 text-left cursor-pointer w-56"
@@ -511,6 +784,7 @@ export default function DashboardPage() {
                               ))}
                           </div>
                         </th>
+
 
                         {/* Capacity */}
                         <th
@@ -537,6 +811,7 @@ export default function DashboardPage() {
                           </div>
                         </th>
 
+
                         {/* Plan */}
                         <th
                           className="px-6 py-3 text-right cursor-pointer w-32"
@@ -559,6 +834,7 @@ export default function DashboardPage() {
                               ))}
                           </div>
                         </th>
+
 
                         {/* Status */}
                         <th
@@ -585,6 +861,7 @@ export default function DashboardPage() {
                       </tr>
                     </thead>
 
+
                     <tbody>
                       {sortedDetailData.map((row, idx) => {
                         const rowId = row.id ?? String(idx);
@@ -596,6 +873,7 @@ export default function DashboardPage() {
                             : status === "ON CAPACITY"
                             ? "bg-blue-100 text-blue-700"
                             : "bg-green-100 text-green-700";
+
 
                         return (
                           <React.Fragment key={rowId}>
@@ -614,11 +892,13 @@ export default function DashboardPage() {
                                 )}
                               </td>
 
+
                               <td className="px-6 py-4 align-top">
                                 <div className="text-sm font-medium text-gray-900">
                                   {row.employee_name ?? "-"}
                                 </div>
                               </td>
+
 
                               <td className="px-6 py-4 align-top">
                                 <div className="text-sm text-gray-600 break-all">
@@ -626,11 +906,13 @@ export default function DashboardPage() {
                                 </div>
                               </td>
 
+
                               <td className="px-6 py-4 align-top">
                                 <div className="text-sm text-gray-700">
                                   {row.role ?? "-"}
                                 </div>
                               </td>
+
 
                               <td className="px-6 py-4 text-right align-top">
                                 <div className="text-sm font-medium text-gray-900">
@@ -638,11 +920,13 @@ export default function DashboardPage() {
                                 </div>
                               </td>
 
+
                               <td className="px-6 py-4 text-right align-top">
                                 <div className="text-sm font-medium text-gray-900">
                                   {row.plan ?? 0}
                                 </div>
                               </td>
+
 
                               <td className="px-6 py-4 align-top">
                                 <span
@@ -652,6 +936,7 @@ export default function DashboardPage() {
                                 </span>
                               </td>
                             </tr>
+
 
                             {/* Expanded project plans (tidy UI) */}
                             {isOpen && (
@@ -717,6 +1002,272 @@ export default function DashboardPage() {
                 </div>
               )}
 
+
+            {/* Productivity table */}
+            {isProductivityModal && !detailLoading &&
+              !detailError &&
+              productivityDetailData &&
+              productivityDetailData.length > 0 && (
+                <div className="mt-4 border rounded-lg overflow-auto max-h-[72vh]">
+                  <table className="w-full min-w-[980px] table-auto">
+                    <thead className="sticky top-0 bg-white/90 backdrop-blur-sm z-10">
+                      <tr className="text-sm text-gray-700 border-b">
+                        <th className="px-6 py-3 w-12"></th>
+
+
+                        {/* Full Name */}
+                        <th
+                          className="px-6 py-3 text-left cursor-pointer select-none"
+                          onClick={() => {
+                            setSortKey("employee_name");
+                            setSortDir(
+                              sortKey === "employee_name" && sortDir === "asc"
+                                ? "desc"
+                                : "asc"
+                            );
+                          }}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold">Full Name</span>
+                            {sortKey === "employee_name" &&
+                              (sortDir === "asc" ? (
+                                <span>▲</span>
+                              ) : (
+                                <span>▼</span>
+                              ))}
+                          </div>
+                        </th>
+
+
+                        {/* Email */}
+                        <th
+                          className="px-6 py-3 text-left cursor-pointer"
+                          onClick={() => {
+                            setSortKey("employee_email");
+                            setSortDir(
+                              sortKey === "employee_email" && sortDir === "asc"
+                                ? "desc"
+                                : "asc"
+                            );
+                          }}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold">Email</span>
+                            {sortKey === "employee_email" &&
+                              (sortDir === "asc" ? (
+                                <span>▲</span>
+                              ) : (
+                                <span>▼</span>
+                              ))}
+                          </div>
+                        </th>
+
+
+                        {/* Role */}
+                        <th
+                          className="px-6 py-3 text-left cursor-pointer w-56"
+                          onClick={() => {
+                            setSortKey("role");
+                            setSortDir(
+                              sortKey === "role" && sortDir === "asc"
+                                ? "desc"
+                                : "asc"
+                            );
+                          }}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold">Role</span>
+                            {sortKey === "role" &&
+                              (sortDir === "asc" ? (
+                                <span>▲</span>
+                              ) : (
+                                <span>▼</span>
+                              ))}
+                          </div>
+                        </th>
+
+
+                        {/* Plan */}
+                        <th
+                          className="px-6 py-3 text-right cursor-pointer w-32"
+                          onClick={() => {
+                            setSortKey("plan");
+                            setSortDir(
+                              sortKey === "plan" && sortDir === "asc"
+                                ? "desc"
+                                : "asc"
+                            );
+                          }}
+                        >
+                          <div className="flex items-center justify-end gap-2">
+                            <span className="font-semibold">Total Plan</span>
+                            {sortKey === "plan" &&
+                              (sortDir === "asc" ? (
+                                <span>▲</span>
+                              ) : (
+                                <span>▼</span>
+                              ))}
+                          </div>
+                        </th>
+
+
+                        {/* Actual */}
+                        <th
+                          className="px-6 py-3 text-right cursor-pointer w-32"
+                          onClick={() => {
+                            setSortKey("actual");
+                            setSortDir(
+                              sortKey === "actual" && sortDir === "asc"
+                                ? "desc"
+                                : "asc"
+                            );
+                          }}
+                        >
+                          <div className="flex items-center justify-end gap-2">
+                            <span className="font-semibold">Total Actual</span>
+                            {sortKey === "actual" &&
+                              (sortDir === "asc" ? (
+                                <span>▲</span>
+                              ) : (
+                                <span>▼</span>
+                              ))}
+                          </div>
+                        </th>
+                      </tr>
+                    </thead>
+
+
+                    <tbody>
+                      {sortedProductivityDetailData.map((row, idx) => {
+                        const rowId = row.id ?? String(idx);
+                        const isOpen = expandedRows.has(rowId);
+
+
+                        return (
+                          <React.Fragment key={rowId}>
+                            <tr className="odd:bg-white even:bg-gray-50">
+                              <td className="px-6 py-4 align-top">
+                                {row.project_plans &&
+                                row.project_plans.length > 0 ? (
+                                  <button
+                                    onClick={() => toggleRow(rowId)}
+                                    className="inline-flex items-center justify-center w-8 h-8 rounded border text-gray-700 hover:bg-gray-100"
+                                  >
+                                    {isOpen ? "−" : "+"}
+                                  </button>
+                                ) : (
+                                  <span className="inline-block w-8 h-8" />
+                                )}
+                              </td>
+
+
+                              <td className="px-6 py-4 align-top">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {row.employee_name ?? "-"}
+                                </div>
+                              </td>
+
+
+                              <td className="px-6 py-4 align-top">
+                                <div className="text-sm text-gray-600 break-all">
+                                  {row.employee_email ?? "-"}
+                                </div>
+                              </td>
+
+
+                              <td className="px-6 py-4 align-top">
+                                <div className="text-sm text-gray-700">
+                                  {row.role ?? "-"}
+                                </div>
+                              </td>
+
+
+                              <td className="px-6 py-4 text-right align-top">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {Math.round(row.plan ?? 0)}
+                                </div>
+                              </td>
+
+
+                              <td className="px-6 py-4 text-right align-top">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {Math.round(row.actual ?? 0)}
+                                </div>
+                              </td>
+                            </tr>
+
+
+                            {/* Expanded project plans */}
+                            {isOpen && (
+                              <tr className="bg-gray-50">
+                                <td colSpan={6} className="px-6 py-3">
+                                  <div className="p-0 border rounded">
+                                    <div className="overflow-x-auto">
+                                      <table className="w-full table-auto">
+                                        <thead>
+                                          <tr className="bg-white/50">
+                                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                                              Project Name
+                                            </th>
+                                            <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 w-36">
+                                              Plan
+                                            </th>
+                                            <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 w-36">
+                                              Actual
+                                            </th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          {row.project_plans &&
+                                          row.project_plans.length > 0 ? (
+                                            row.project_plans.map(
+                                              (pp: any, i: number) => (
+                                                <tr
+                                                  key={i}
+                                                  className={
+                                                    i % 2 === 0
+                                                      ? "bg-white"
+                                                      : "bg-gray-50"
+                                                  }
+                                                >
+                                                  <td className="px-4 py-3 text-gray-800">
+                                                    {pp.project_id?.name ?? "-"}
+                                                  </td>
+                                                  <td className="px-4 py-3 text-right font-medium text-gray-900">
+                                                    {Math.round(pp.plan ?? 0)}
+                                                  </td>
+                                                  <td className="px-4 py-3 text-right font-medium text-gray-900">
+                                                    {Math.round(pp.actual ?? 0)}
+                                                  </td>
+                                                </tr>
+                                              )
+                                            )
+                                          ) : (
+                                            <tr>
+                                              <td
+                                                colSpan={3}
+                                                className="px-4 py-3 text-gray-500"
+                                              >
+                                                No project plans
+                                              </td>
+                                            </tr>
+                                          )}
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+
             <div className="h-3" />
           </div>
         </div>
@@ -724,3 +1275,6 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+
+

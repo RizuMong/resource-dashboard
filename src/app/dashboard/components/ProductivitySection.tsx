@@ -1,5 +1,6 @@
 "use client";
 
+
 import {
   BarChart,
   Bar,
@@ -13,38 +14,46 @@ import {
 } from "recharts";
 import { useMemo } from "react";
 
+
 interface ProductivityData {
   name: string;
   actual: number;
   plan: number;
+  month?: number;
+  year?: number;
 }
+
 
 interface ProductivitySectionProps {
   data?: ProductivityData[];
+  onBarClick?: (payload: ProductivityData) => void;
 }
 
-export function ProductivitySection({ data }: ProductivitySectionProps) {
+
+export function ProductivitySection({ data, onBarClick }: ProductivitySectionProps) {
   // Mock data bawaan (Jan - Dec)
   const mockData = useMemo(
     () => [
-      { name: "Jan", actual: 0, plan: 0 },
-      { name: "Feb", actual: 0, plan: 0 },
-      { name: "Mar", actual: 0, plan: 0 },
-      { name: "Apr", actual: 0, plan: 0 },
-      { name: "May", actual: 0, plan: 0 },
-      { name: "Jun", actual: 0, plan: 0 },
-      { name: "Jul", actual: 0, plan: 0 },
-      { name: "Aug", actual: 0, plan: 0 },
-      { name: "Sep", actual: 0, plan: 0 },
-      { name: "Oct", actual: 0, plan: 0 },
-      { name: "Nov", actual: 0, plan: 0 },
-      { name: "Dec", actual: 0, plan: 0 },
+      { name: "January", actual: 0, plan: 0, month: 1 },
+      { name: "February", actual: 0, plan: 0, month: 2 },
+      { name: "March", actual: 0, plan: 0, month: 3 },
+      { name: "April", actual: 0, plan: 0, month: 4 },
+      { name: "May", actual: 0, plan: 0, month: 5 },
+      { name: "June", actual: 0, plan: 0, month: 6 },
+      { name: "July", actual: 0, plan: 0, month: 7 },
+      { name: "August", actual: 0, plan: 0, month: 8 },
+      { name: "September", actual: 0, plan: 0, month: 9 },
+      { name: "October", actual: 0, plan: 0, month: 10 },
+      { name: "November", actual: 0, plan: 0, month: 11 },
+      { name: "December", actual: 0, plan: 0, month: 12 },
     ],
     []
   );
 
+
   // Gunakan data dari props, kalau kosong fallback ke mockData
   const chartData = data && data.length > 0 ? data : mockData;
+
 
   // Warna bold dan tetap nyaman di mata
   const barColors = {
@@ -52,13 +61,24 @@ export function ProductivitySection({ data }: ProductivitySectionProps) {
     plan: "#A78BFA", // purple-400 (lebih kontras tapi kalem)
   };
 
+
   const hasData = Array.isArray(chartData) && chartData.length > 0;
+
+
+  // recharts onClick handler sends (data, index). We pick data.payload.
+  const handleBarClick = (event: any) => {
+    const payload: ProductivityData | undefined = event?.payload;
+    if (!payload) return;
+    if (onBarClick) onBarClick(payload);
+  };
+
 
   return (
     <div className="border rounded-xl bg-white p-6">
       <h2 className="text-lg font-semibold text-gray-800 mb-4">
-        Productivity Overview (Coming Soon)
+        Productivity Overview
       </h2>
+
 
       <div className="h-[360px] w-full">
         {hasData ? (
@@ -105,6 +125,7 @@ export function ProductivitySection({ data }: ProductivitySectionProps) {
                 verticalAlign="bottom"
               />
 
+
               {/* Total Actual */}
               <Bar
                 dataKey="actual"
@@ -114,6 +135,7 @@ export function ProductivitySection({ data }: ProductivitySectionProps) {
                 isAnimationActive={true}
                 animationDuration={700}
                 animationEasing="ease-in-out"
+                onClick={handleBarClick}
               >
                 <LabelList
                   dataKey="actual"
@@ -128,6 +150,7 @@ export function ProductivitySection({ data }: ProductivitySectionProps) {
                 />
               </Bar>
 
+
               {/* Total SA Plan */}
               <Bar
                 dataKey="plan"
@@ -137,6 +160,7 @@ export function ProductivitySection({ data }: ProductivitySectionProps) {
                 isAnimationActive={true}
                 animationDuration={700}
                 animationEasing="ease-in-out"
+                onClick={handleBarClick}
               >
                 <LabelList
                   dataKey="plan"
@@ -163,3 +187,6 @@ export function ProductivitySection({ data }: ProductivitySectionProps) {
     </div>
   );
 }
+
+
+
