@@ -1,6 +1,5 @@
 "use client";
 
-
 import React from "react";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { FilterSelect } from "./components/FilterSelect";
@@ -10,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Loader2, X } from "lucide-react";
 import { API_CONFIG } from "@/lib/api";
 
-
 interface ChartData {
   id?: string;
   month?: number;
@@ -19,7 +17,6 @@ interface ChartData {
   capacity: number;
 }
 
-
 interface ProjectPlan {
   plan: number;
   project_id: {
@@ -27,7 +24,6 @@ interface ProjectPlan {
     name: string;
   };
 }
-
 
 interface DetailResponseItem {
   capacity?: number;
@@ -43,7 +39,6 @@ interface DetailResponseItem {
   year?: number;
 }
 
-
 interface ProductivityProjectPlan {
   plan: number;
   actual: number;
@@ -52,7 +47,6 @@ interface ProductivityProjectPlan {
     name: string;
   };
 }
-
 
 interface ProductivityDetailItem {
   actual?: number;
@@ -73,6 +67,7 @@ export default function DashboardPage() {
   const [filters, setFilters] = useState({
     person: null as { id: string; name: string } | null,
     project: null as { id: string; name: string } | null,
+    role: null as { id: string; name: string } | null,
     // sprint: null as { id: string; name: string } | null,
     year: null as { id: string | number; name: string | number } | null,
   });
@@ -257,6 +252,7 @@ export default function DashboardPage() {
       const f = filtersRef.current;
       if (f.person?.id) params.append("employee_id", f.person.id);
       if (f.project?.id) params.append("project_id", f.project.id);
+      if (f.role?.id) params.append("role_id", f.role.id);
       // if (f.sprint?.id) params.append("sprint_id", f.sprint.id);
 
 
@@ -301,9 +297,6 @@ export default function DashboardPage() {
 
       setChartData(formatted);
 
-
-
-
     } catch (err) {
       console.error("Fetch list error:", err);
       setChartData([]);
@@ -333,6 +326,7 @@ export default function DashboardPage() {
       const f = filtersRef.current;
       if (f.person?.id) params.append("employee_id", f.person.name);
       if (f.project?.id) params.append("project_id", f.project.id);
+      if (f.role?.id) params.append("role_id", f.role.id);
       // if (f.sprint?.id) params.append("sprint_id", f.sprint.id);
 
 
@@ -359,12 +353,10 @@ export default function DashboardPage() {
 
       const apiData: any[] = result?.data ?? [];
 
-
       if (!apiData.length) {
         setProductivityData([]);
         return;
       }
-
 
       const prod = apiData.map((it: any) => ({
         name: it.name ?? `Month ${it.month ?? ""}`,
@@ -429,6 +421,7 @@ export default function DashboardPage() {
       const f = filtersRef.current;
       if (f.person?.id) params.append("employee_id", f.person.id);
       if (f.project?.id) params.append("project_id", f.project.id);
+      if (f.role?.id) params.append("role_id", f.role.id);
       // if (f.sprint?.id) params.append("sprint_id", f.sprint.id);
 
 
@@ -498,6 +491,7 @@ export default function DashboardPage() {
       const f = filtersRef.current;
       if (f.person?.id) params.append("employee_id", f.person.id);
       if (f.project?.id) params.append("project_id", f.project.id);
+      if (f.role?.id) params.append("role_id", f.role.id);
       // if (f.sprint?.id) params.append("sprint_id", f.sprint.id);
 
 
@@ -595,6 +589,12 @@ export default function DashboardPage() {
           onChange={(v) => handleFilterChange("sprint", v)}
         /> */}
 
+        <FilterSelect
+          label="Select Role"
+          endpoint={API_CONFIG.endpoints.role}
+          onChange={(v) => handleFilterChange("role", v)}
+        />
+
 
         <FilterSelect
           label="Select Year"
@@ -631,6 +631,7 @@ export default function DashboardPage() {
         year={chartYear}
         onBarClick={onChartBarClick}
       />
+
       <ProductivitySection
         data={productivityData}
         onBarClick={onProductivityBarClick}
@@ -1305,8 +1306,6 @@ export default function DashboardPage() {
                   </table>
                 </div>
               )}
-
-
             <div className="h-3" />
           </div>
         </div>

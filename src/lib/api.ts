@@ -19,6 +19,7 @@ export const API_CONFIG = {
     sprint: "/project-management/sprint/index",
     employee: "/project-management/employee/index",
     year: "/project-management/year/index",
+    role: "/project-management/role/index",
     
     // Bisa tambahkan endpoints lain
     // dashboard: "/dashboard/overview",

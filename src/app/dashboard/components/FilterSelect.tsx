@@ -18,6 +18,7 @@ const API_CONFIG = {
   endpoints: {
     project: "/project-management/project/index",
     sprint: "/project-management/sprint/index",
+    role: "/project-management/role/index",
     employee: "/project-management/employee/index",
     year: "/project-management/year/index",
   },
@@ -147,6 +148,12 @@ interface ProjectData {
   status: string;
 }
 
+interface RoleData {
+  id: string;
+  name: string;
+  code: string;
+}
+
 interface SprintData {
   id: string;
   name: string;
@@ -170,7 +177,7 @@ interface YearData {
   status: string;
 }
 
-type FilterData = ProjectData | SprintData | EmployeeData | YearData;
+type FilterData = ProjectData | SprintData | EmployeeData | YearData | RoleData;
 
 // ==================== Custom Hook for API Data ====================
 function useApiData(endpoint: string) {
