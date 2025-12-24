@@ -324,7 +324,7 @@ export default function DashboardPage() {
 
 
       const f = filtersRef.current;
-      if (f.person?.id) params.append("employee_id", f.person.name);
+      if (f.person?.id) params.append("employee_id", f.person.id);
       if (f.project?.id) params.append("project_id", f.project.id);
       if (f.role?.id) params.append("role_id", f.role.id);
       // if (f.sprint?.id) params.append("sprint_id", f.sprint.id);
