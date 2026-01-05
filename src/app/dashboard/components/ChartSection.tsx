@@ -12,9 +12,6 @@ import {
   Legend,
 } from "recharts";
 
-/* =========================
-   Types
-========================= */
 export interface ChartItem {
   id?: string;
   month?: number;
@@ -29,34 +26,24 @@ export interface ChartItem {
     devops?: { plan: number; capacity: number };
     technical_writer?: { plan: number; capacity: number };
   };
-}
+};
 
 interface ChartSectionProps {
   data?: ChartItem[];
   year?: number | string;
   onBarClick?: (payload: ChartItem) => void;
-}
+};
 
-/* =========================
-   Role Config
-========================= */
 const ROLE_CONFIG = [
-  { key: "solution_engineer", label: "SE" },
-  { key: "system_analyst", label: "SA" },
-  { key: "quality_assurance", label: "QA" },
+  { key: "solution_engineer", label: "Solution Engineer" },
+  { key: "system_analyst", label: "System Analyst" },
+  { key: "quality_assurance", label: "Quality Assurance" },
   { key: "devops", label: "DevOps" },
-  { key: "technical_writer", label: "TW" },
+  { key: "technical_writer", label: "Technical Writer" },
 ];
 
-/* =========================
-   Component
-========================= */
 export function ChartSection({ data, year, onBarClick }: ChartSectionProps) {
   const displayYear = year ?? new Date().getFullYear();
-
-  /* =========================
-     Mock Data (Fallback)
-  ========================= */
   const mockData: ChartItem[] = [
     {
       name: "Jan",
@@ -74,17 +61,10 @@ export function ChartSection({ data, year, onBarClick }: ChartSectionProps) {
     },
   ];
 
-  const chartData =
-    Array.isArray(data) && data.length > 0 ? data : mockData;
-
-  const hasRealData =
-    Array.isArray(data) && data.length > 0;
-
+  const chartData = Array.isArray(data) && data.length > 0 ? data : mockData;
+  const hasRealData = Array.isArray(data) && data.length > 0;
   const isSingleMonth = chartData.length === 1;
 
-  /* =========================
-     Handlers
-  ========================= */
   const handleBarClick = (event: any) => {
     const payload: ChartItem | undefined = event?.payload;
     if (!payload) return;
@@ -102,9 +82,6 @@ export function ChartSection({ data, year, onBarClick }: ChartSectionProps) {
     });
   }
 
-  /* =========================
-     Colors
-  ========================= */
   const barColors = {
     plan: "#FACC15",     // 🟡 Plan
     capacity: "#60A5FA", // 🔵 Capacity
@@ -112,9 +89,6 @@ export function ChartSection({ data, year, onBarClick }: ChartSectionProps) {
 
   return (
     <div className="border rounded-xl bg-white p-6">
-      {/* =========================
-          Header
-      ========================= */}
       <div className="flex items-center mb-4">
         <h2 className="text-lg font-semibold text-gray-800">
           Resource Planning{" "}
@@ -124,9 +98,8 @@ export function ChartSection({ data, year, onBarClick }: ChartSectionProps) {
         </h2>
       </div>
 
-      {/* =========================
-          MAIN CHART (MONTHLY)
-      ========================= */}
+
+      {/* Resource Planning */}
       <div className="h-[360px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
@@ -170,9 +143,7 @@ export function ChartSection({ data, year, onBarClick }: ChartSectionProps) {
         </p>
       )}
 
-      {/* =========================
-          RESOURCE BY ROLE
-      ========================= */}
+      {/* Resource By Role */}
       <div className="mt-12">
         <h3 className="text-md font-semibold text-gray-800 mb-6">
           Resource Planning by Role
@@ -232,9 +203,11 @@ export function ChartSection({ data, year, onBarClick }: ChartSectionProps) {
                       />
 
                       <Tooltip
-                        formatter={(value: number, name: string) => [
+                        formatter={(value: number, _name: string, payload: any) => [
                           value,
-                          name === "plan" ? "Plan (MD)" : "Capacity (MD)",
+                          payload?.dataKey === "plan"
+                            ? "Plan (MD)"
+                            : "Capacity (MD)",
                         ]}
                       />
 
