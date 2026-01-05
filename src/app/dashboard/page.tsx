@@ -15,6 +15,7 @@ interface ChartData {
   name: string;
   plan: number;
   capacity: number;
+  summary: any;
 }
 
 interface ProjectPlan {
@@ -292,6 +293,7 @@ export default function DashboardPage() {
         name: it.name ?? `Month ${it.month ?? ""}`,
         plan: Number(it.plan ?? 0),
         capacity: Number(it.capacity ?? 0),
+        summary: it.summary
       }));
 
 

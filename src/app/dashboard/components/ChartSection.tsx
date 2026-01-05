@@ -1,7 +1,5 @@
-// components/ChartSection.tsx
 "use client";
 
-import React from "react";
 import {
   BarChart,
   Bar,
@@ -14,12 +12,23 @@ import {
   Legend,
 } from "recharts";
 
+/* =========================
+   Types
+========================= */
 export interface ChartItem {
   id?: string;
   month?: number;
   name: string;
   plan: number;
   capacity: number;
+  summary: {
+    solution_engineer?: { plan: number; capacity: number };
+    ui_solution_engineer?: { plan: number; capacity: number };
+    system_analyst?: { plan: number; capacity: number };
+    quality_assurance?: { plan: number; capacity: number };
+    devops?: { plan: number; capacity: number };
+    technical_writer?: { plan: number; capacity: number };
+  };
 }
 
 interface ChartSectionProps {
@@ -28,51 +37,96 @@ interface ChartSectionProps {
   onBarClick?: (payload: ChartItem) => void;
 }
 
+/* =========================
+   Role Config
+========================= */
+const ROLE_CONFIG = [
+  { key: "solution_engineer", label: "SE" },
+  { key: "system_analyst", label: "SA" },
+  { key: "quality_assurance", label: "QA" },
+  { key: "devops", label: "DevOps" },
+  { key: "technical_writer", label: "TW" },
+];
+
+/* =========================
+   Component
+========================= */
 export function ChartSection({ data, year, onBarClick }: ChartSectionProps) {
   const displayYear = year ?? new Date().getFullYear();
 
+  /* =========================
+     Mock Data (Fallback)
+  ========================= */
   const mockData: ChartItem[] = [
-    { name: "Jan", plan: 0, capacity: 0, month: 1 },
-    { name: "Feb", plan: 0, capacity: 0, month: 2 },
-    { name: "Mar", plan: 0, capacity: 0, month: 3 },
-    { name: "Apr", plan: 0, capacity: 0, month: 4 },
-    { name: "May", plan: 0, capacity: 0, month: 5 },
-    { name: "Jun", plan: 0, capacity: 0, month: 6 },
-    { name: "Jul", plan: 0, capacity: 0, month: 7 },
-    { name: "Aug", plan: 0, capacity: 0, month: 8 },
-    { name: "Sep", plan: 0, capacity: 0, month: 9 },
-    { name: "Oct", plan: 0, capacity: 0, month: 10 },
-    { name: "Nov", plan: 0, capacity: 0, month: 11 },
-    { name: "Dec", plan: 0, capacity: 0, month: 12 },
+    {
+      name: "Jan",
+      month: 1,
+      plan: 0,
+      capacity: 0,
+      summary: {
+        solution_engineer: { plan: 0, capacity: 0 },
+        ui_solution_engineer: { plan: 0, capacity: 0 },
+        system_analyst: { plan: 0, capacity: 0 },
+        quality_assurance: { plan: 0, capacity: 0 },
+        devops: { plan: 0, capacity: 0 },
+        technical_writer: { plan: 0, capacity: 0 },
+      },
+    },
   ];
 
-  const chartData = data && data.length > 0 ? data : mockData;
-  const hasRealData = Boolean(data && data.length > 0);
+  const chartData =
+    Array.isArray(data) && data.length > 0 ? data : mockData;
 
-  const barColors = {
-    plan: "#FACC15",
-    capacity: "#60A5FA",
-  };
+  const hasRealData =
+    Array.isArray(data) && data.length > 0;
 
-  // recharts onClick handler sends (data, index). We pick data.payload.
+  const isSingleMonth = chartData.length === 1;
+
+  /* =========================
+     Handlers
+  ========================= */
   const handleBarClick = (event: any) => {
-    // event might be undefined when clicking empty areas
     const payload: ChartItem | undefined = event?.payload;
     if (!payload) return;
-    if (onBarClick) onBarClick(payload);
+    onBarClick?.(payload);
+  };
+
+  function mapSummaryToRoleData(summary: any) {
+    return ROLE_CONFIG.map(function (role) {
+      const roleData = summary?.[role.key] || {};
+      return {
+        role: role.label,
+        plan: roleData.plan || 0,
+        capacity: roleData.capacity || 0,
+      };
+    });
+  }
+
+  /* =========================
+     Colors
+  ========================= */
+  const barColors = {
+    plan: "#FACC15",     // 🟡 Plan
+    capacity: "#60A5FA", // 🔵 Capacity
   };
 
   return (
     <div className="border rounded-xl bg-white p-6">
+      {/* =========================
+          Header
+      ========================= */}
       <div className="flex items-center mb-4">
         <h2 className="text-lg font-semibold text-gray-800">
           Resource Planning{" "}
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
+          <span className="ml-2 px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-700">
             {displayYear}
           </span>
         </h2>
       </div>
 
+      {/* =========================
+          MAIN CHART (MONTHLY)
+      ========================= */}
       <div className="h-[360px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
@@ -81,37 +135,11 @@ export function ChartSection({ data, year, onBarClick }: ChartSectionProps) {
             barCategoryGap="20%"
             margin={{ top: 20, right: 20, left: 10, bottom: 20 }}
           >
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="#E5E7EB"
-              vertical={false}
-            />
-            <XAxis
-              dataKey="name"
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: "#6B7280", fontSize: 13 }}
-            />
-            <YAxis
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: "#9CA3AF", fontSize: 12 }}
-            />
-            <Tooltip
-              cursor={{ fill: "rgba(0,0,0,0.03)" }}
-              contentStyle={{
-                backgroundColor: "white",
-                borderRadius: "8px",
-                border: "1px solid #E5E7EB",
-                fontSize: "13px",
-              }}
-            />
-            <Legend
-              verticalAlign="bottom"
-              height={36}
-              iconType="circle"
-              iconSize={10}
-            />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <XAxis dataKey="name" axisLine={false} tickLine={false} />
+            <YAxis axisLine={false} tickLine={false} />
+            <Tooltip />
+            <Legend verticalAlign="bottom" height={36} />
 
             <Bar
               dataKey="plan"
@@ -120,17 +148,7 @@ export function ChartSection({ data, year, onBarClick }: ChartSectionProps) {
               radius={[6, 6, 0, 0]}
               onClick={handleBarClick}
             >
-              <LabelList
-                dataKey="plan"
-                position="top"
-                fill="#374151"
-                fontSize={12}
-                formatter={(label: unknown) =>
-                  typeof label === "number" || typeof label === "string"
-                    ? label.toString()
-                    : ""
-                }
-              />
+              <LabelList dataKey="plan" position="top" />
             </Bar>
 
             <Bar
@@ -140,29 +158,130 @@ export function ChartSection({ data, year, onBarClick }: ChartSectionProps) {
               radius={[6, 6, 0, 0]}
               onClick={handleBarClick}
             >
-              <LabelList
-                dataKey="capacity"
-                position="top"
-                fill="#1F2937"
-                fontSize={12}
-                formatter={(label: unknown) =>
-                  typeof label === "number" || typeof label === "string"
-                    ? label.toString()
-                    : ""
-                }
-              />
+              <LabelList dataKey="capacity" position="top" />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
 
       {!hasRealData && (
-        <div className="flex items-center justify-center h-20 mt-4">
-          <p className="text-gray-400 text-sm">
-            No data available for {displayYear}. Please apply filters.
-          </p>
-        </div>
+        <p className="text-center text-gray-400 mt-4 text-sm">
+          No data available for {displayYear}
+        </p>
       )}
+
+      {/* =========================
+          RESOURCE BY ROLE
+      ========================= */}
+      <div className="mt-12">
+        <h3 className="text-md font-semibold text-gray-800 mb-6">
+          Resource Planning by Role
+        </h3>
+
+        <div
+          className={
+            isSingleMonth
+              ? "flex flex-wrap gap-8"
+              : "flex gap-8 overflow-x-auto pb-4"
+          }
+        >
+          {chartData.map(function (monthItem) {
+            const roleSummaryData = mapSummaryToRoleData(
+              monthItem.summary
+            );
+
+            return (
+              <div
+                key={monthItem.month}
+                className={
+                  isSingleMonth
+                    ? "w-full"
+                    : "min-w-[420px]"
+                }
+              >
+                {/* Month Label */}
+                <div className="text-center mb-2 text-sm font-medium text-gray-700">
+                  {monthItem.name}
+                </div>
+
+                {/* Chart */}
+                <div className="h-[260px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={roleSummaryData}
+                      barCategoryGap="25%"
+                      barGap={6}
+                      margin={{ top: 24, right: 20, left: 10, bottom: 40 }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        vertical={false}
+                      />
+
+                      <XAxis
+                        dataKey="role"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: "#374151", fontSize: 12 }}
+                      />
+
+                      <YAxis
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: "#6B7280", fontSize: 11 }}
+                      />
+
+                      <Tooltip
+                        formatter={(value: number, name: string) => [
+                          value,
+                          name === "plan" ? "Plan (MD)" : "Capacity (MD)",
+                        ]}
+                      />
+
+                      {/* 🟡 PLAN */}
+                      <Bar
+                        dataKey="plan"
+                        name="Plan (MD)"
+                        fill="#FACC15"
+                        radius={[6, 6, 0, 0]}
+                      >
+                        <LabelList
+                          dataKey="plan"
+                          position="top"
+                          fontSize={11}
+                        />
+                      </Bar>
+
+                      {/* 🔵 CAPACITY */}
+                      <Bar
+                        dataKey="capacity"
+                        name="Capacity (MD)"
+                        fill="#60A5FA"
+                        radius={[6, 6, 0, 0]}
+                      >
+                        <LabelList
+                          dataKey="capacity"
+                          position="top"
+                          fontSize={11}
+                        />
+                      </Bar>
+
+                      {/* ✅ LEGEND DI BAWAH */}
+                      <Legend
+                        verticalAlign="bottom"
+                        align="center"
+                        iconType="circle"
+                        iconSize={10}
+                        wrapperStyle={{ paddingTop: 12 }}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
