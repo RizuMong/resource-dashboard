@@ -169,7 +169,7 @@ export function ProductivitySection({
       {hasData && (
         <div className="mt-10">
           <div className="font-semibold text-gray-800 mb-4">
-            Resource Planning by Role
+            Productivity by Role
           </div>
 
           <div
