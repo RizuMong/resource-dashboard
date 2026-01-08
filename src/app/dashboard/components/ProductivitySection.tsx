@@ -13,23 +13,6 @@ import {
 } from "recharts";
 import { useMemo } from "react";
 
-/* =========================
-   Types
-========================= */
-interface RoleSummary {
-  plan: number;
-  capacity: number;
-}
-
-interface SummaryData {
-  solution_engineer?: RoleSummary;
-  ui_solution_engineer?: RoleSummary;
-  system_analyst?: RoleSummary;
-  quality_assurance?: RoleSummary;
-  devops?: RoleSummary;
-  technical_writer?: RoleSummary;
-}
-
 export interface ProductivityData {
   name: string;
   actual: number;
@@ -37,17 +20,21 @@ export interface ProductivityData {
   month?: number;
   year?: number;
   id?: string;
-  summary: SummaryData; // ⬅️ WAJIB
+  summary: {
+    solution_engineer?: { plan: number; actual: number };
+    ui_solution_engineer?: { plan: number; actual: number };
+    system_analyst?: { plan: number; actual: number };
+    quality_assurance?: { plan: number; actual: number };
+    devops?: { plan: number; actual: number };
+    technical_writer?: { plan: number; actual: number };
+  };
 }
 
 interface ProductivitySectionProps {
   data?: ProductivityData[];
   onBarClick?: (payload: ProductivityData) => void;
-}
+};
 
-/* =========================
-   Constants
-========================= */
 const ROLE_CONFIG = [
   { key: "solution_engineer", label: "Solution Engineer" },
   { key: "ui_solution_engineer", label: "UI Solution Engineer" },
@@ -62,16 +49,33 @@ const BAR_COLORS = {
   plan: "#A78BFA",
 };
 
-/* =========================
-   Component
-========================= */
+function hasMeaningfulData(item: ProductivityData) {
+  if (item.actual > 0 || item.plan > 0) return true;
+
+  if (item.summary) {
+    return Object.values(item.summary).some(
+      (role) => role && (role.plan > 0 || role.actual > 0)
+    );
+  }
+
+  return false;
+}
+
+function mapSummaryToRoleData(summary: ProductivityData["summary"]) {
+  return ROLE_CONFIG.map((role) => {
+    const roleData = summary?.[role.key as keyof ProductivityData["summary"]];
+    return {
+      role: role.label,
+      plan: roleData?.plan || 0,
+      actual: roleData?.actual || 0,
+    };
+  });
+}
+
 export function ProductivitySection({
   data,
   onBarClick,
 }: ProductivitySectionProps) {
-  /* =========================
-     Mock (fallback)
-  ========================= */
   const mockData: ProductivityData[] = useMemo(
     () => [
       {
@@ -79,61 +83,28 @@ export function ProductivitySection({
         actual: 0,
         plan: 0,
         month: 1,
-        summary: {
-          solution_engineer: { plan: 0, capacity: 0 },
-          ui_solution_engineer: { plan: 0, capacity: 0 },
-          system_analyst: { plan: 0, capacity: 0 },
-          quality_assurance: { plan: 0, capacity: 0 },
-          devops: { plan: 0, capacity: 0 },
-          technical_writer: { plan: 0, capacity: 0 },
-        },
+        summary: {},
       },
     ],
     []
   );
 
-  /* =========================
-     Safe Chart Data
-  ========================= */
-  const chartData = useMemo<ProductivityData[]>(() => {
-    if (!Array.isArray(data) || data.length === 0) return mockData;
+  const rawData = Array.isArray(data) && data.length > 0 ? data : mockData;
 
-    // pastikan summary selalu ada
-    return data.map((item) => ({
-      ...item,
-      summary: item.summary || {},
-    }));
-  }, [data, mockData]);
+  const filteredChartData = useMemo(
+    () => rawData.filter(hasMeaningfulData),
+    [rawData]
+  );
 
-  const hasData = chartData.length > 0;
+  const hasData = filteredChartData.length > 0;
+  const isSingleMonth = filteredChartData.length === 1;
 
-  /* =========================
-     Helpers
-  ========================= */
   const handleBarClick = (event: any) => {
     const payload: ProductivityData | undefined = event?.payload;
     if (!payload) return;
     onBarClick?.(payload);
   };
 
-  const mapSummaryToRoleData = (summary: SummaryData) =>
-    ROLE_CONFIG.map((role) => {
-      const roleData = summary?.[role.key as keyof SummaryData];
-      return {
-        role: role.label,
-        plan: roleData?.plan || 0,
-        capacity: roleData?.capacity || 0,
-      };
-    });
-
-  /* =========================
-     Debug (optional)
-  ========================= */
-  console.log("PRODUCTIVITY DATA", chartData);
-
-  /* =========================
-     Render
-  ========================= */
   return (
     <div className="border rounded-xl bg-white p-6">
       <h2 className="text-lg font-semibold text-gray-800 mb-4">
@@ -144,46 +115,26 @@ export function ProductivitySection({
         {hasData ? (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
-              data={chartData}
+              data={filteredChartData}
               barGap={8}
               barCategoryGap="20%"
               margin={{ top: 20, right: 20, left: 10, bottom: 20 }}
             >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="#E5E7EB"
-                vertical={false}
-              />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
 
               <XAxis
                 dataKey="name"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: "#4B5563", fontSize: 12 }}
+                tick={{ fontSize: 12 }}
               />
 
-              <YAxis
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: "#9CA3AF", fontSize: 12 }}
-              />
+              <YAxis axisLine={false} tickLine={false} />
 
-              <Tooltip
-                cursor={{ fill: "rgba(0,0,0,0.05)" }}
-                contentStyle={{
-                  borderRadius: "10px",
-                  border: "1px solid #E5E7EB",
-                  backgroundColor: "#FFFFFF",
-                }}
-              />
+              <Tooltip />
 
-              <Legend
-                wrapperStyle={{ fontSize: 13 }}
-                iconType="circle"
-                verticalAlign="bottom"
-              />
+              <Legend verticalAlign="bottom" iconType="circle" />
 
-              {/* ACTUAL */}
               <Bar
                 dataKey="actual"
                 name="Total Actual (MD)"
@@ -194,7 +145,6 @@ export function ProductivitySection({
                 <LabelList dataKey="actual" position="top" fontSize={12} />
               </Bar>
 
-              {/* PLAN */}
               <Bar
                 dataKey="plan"
                 name="Total Plan (MD)"
@@ -216,13 +166,88 @@ export function ProductivitySection({
       {/* =========================
           Resource by Role
       ========================= */}
-      <div className="mt-10">
-        <div className="font-semibold text-gray-800 mb-4">
-          Resource Planning by Role
-        </div>
+      {hasData && (
+        <div className="mt-10">
+          <div className="font-semibold text-gray-800 mb-4">
+            Resource Planning by Role
+          </div>
 
-        
-      </div>
+          <div
+            className={
+              isSingleMonth
+                ? "flex flex-wrap gap-8"
+                : "flex gap-8 overflow-x-auto pb-4"
+            }
+          >
+            {filteredChartData.map((monthItem) => {
+              const roleData = mapSummaryToRoleData(monthItem.summary);
+
+              return (
+                <div
+                  key={monthItem.month}
+                  className={isSingleMonth ? "w-full" : "min-w-[420px]"}
+                >
+                  <div className="text-center mb-2 text-sm font-medium">
+                    {monthItem.name}
+                  </div>
+
+                  <div className="h-[260px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={roleData}
+                        barGap={6}
+                        barCategoryGap="25%"
+                        margin={{ top: 24, right: 20, left: 10, bottom: 40 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+
+                        <XAxis
+                          dataKey="role"
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fontSize: 12 }}
+                        />
+
+                        <YAxis axisLine={false} tickLine={false} />
+
+                        <Tooltip />
+
+                        <Bar
+                          dataKey="plan"
+                          name="Plan (MD)"
+                          fill="#FACC15"
+                          radius={[6, 6, 0, 0]}
+                        >
+                          <LabelList dataKey="plan" position="top" fontSize={11} />
+                        </Bar>
+
+                        <Bar
+                          dataKey="actual"
+                          name="Actual (MD)"
+                          fill="#60A5FA"
+                          radius={[6, 6, 0, 0]}
+                        >
+                          <LabelList
+                            dataKey="actual"
+                            position="top"
+                            fontSize={11}
+                          />
+                        </Bar>
+
+                        <Legend
+                          verticalAlign="bottom"
+                          iconType="circle"
+                          wrapperStyle={{ paddingTop: 12 }}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
