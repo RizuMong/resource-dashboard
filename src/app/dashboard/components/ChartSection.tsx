@@ -80,7 +80,7 @@ export function ChartSection({ data, year, onBarClick }: ChartSectionProps) {
         capacity: roleData.capacity || 0,
       };
     });
-  }
+  };
 
   const barColors = {
     plan: "#FACC15",     // 🟡 Plan
@@ -145,9 +145,9 @@ export function ChartSection({ data, year, onBarClick }: ChartSectionProps) {
 
       {/* Resource By Role */}
       <div className="mt-12">
-        <h3 className="text-md font-semibold text-gray-800 mb-6">
+        <div className="font-semibold text-gray-800 mb-6">
           Resource Planning by Role
-        </h3>
+        </div>
 
         <div
           className={
