@@ -215,7 +215,7 @@ export function ProductivitySection({
                         <Bar
                           dataKey="plan"
                           name="Plan (MD)"
-                          fill="#FACC15"
+                          fill={BAR_COLORS.plan}
                           radius={[6, 6, 0, 0]}
                         >
                           <LabelList dataKey="plan" position="top" fontSize={11} />
@@ -224,7 +224,7 @@ export function ProductivitySection({
                         <Bar
                           dataKey="actual"
                           name="Actual (MD)"
-                          fill="#60A5FA"
+                          fill={BAR_COLORS.actual}
                           radius={[6, 6, 0, 0]}
                         >
                           <LabelList
