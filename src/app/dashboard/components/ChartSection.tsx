@@ -35,11 +35,12 @@ interface ChartSectionProps {
 };
 
 const ROLE_CONFIG = [
-  { key: "solution_engineer", label: "Solution Engineer" },
-  { key: "system_analyst", label: "System Analyst" },
-  { key: "quality_assurance", label: "Quality Assurance" },
+  { key: "solution_engineer", label: "SE" },
+  { key: "ui_solution_engineer", label: "UI SE" },
+  { key: "system_analyst", label: "SA" },
+  { key: "quality_assurance", label: "QA" },
   { key: "devops", label: "DevOps" },
-  { key: "technical_writer", label: "Technical Writer" },
+  { key: "technical_writer", label: "TW" },
 ];
 
 export function ChartSection({ data, year, onBarClick }: ChartSectionProps) {
