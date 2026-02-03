@@ -11,6 +11,7 @@ import {
   LabelList,
   Legend,
 } from "recharts";
+import { useEffect, useMemo, useState } from "react";
 
 export interface ChartItem {
   id?: string;
@@ -26,13 +27,13 @@ export interface ChartItem {
     devops?: { plan: number; capacity: number };
     technical_writer?: { plan: number; capacity: number };
   };
-};
+}
 
 interface ChartSectionProps {
   data?: ChartItem[];
   year?: number | string;
   onBarClick?: (payload: ChartItem) => void;
-};
+}
 
 const ROLE_CONFIG = [
   { key: "solution_engineer", label: "SE" },
@@ -43,96 +44,120 @@ const ROLE_CONFIG = [
   { key: "technical_writer", label: "TW" },
 ];
 
+const BAR_COLORS = {
+  plan: "#FACC15",
+  capacity: "#60A5FA",
+};
+
 export function ChartSection({ data, year, onBarClick }: ChartSectionProps) {
   const displayYear = year ?? new Date().getFullYear();
-  const mockData: ChartItem[] = [
-    {
-      name: "Jan",
-      month: 1,
-      plan: 0,
-      capacity: 0,
-      summary: {
-        solution_engineer: { plan: 0, capacity: 0 },
-        ui_solution_engineer: { plan: 0, capacity: 0 },
-        system_analyst: { plan: 0, capacity: 0 },
-        quality_assurance: { plan: 0, capacity: 0 },
-        devops: { plan: 0, capacity: 0 },
-        technical_writer: { plan: 0, capacity: 0 },
-      },
-    },
-  ];
+  const [isMobile, setIsMobile] = useState(false);
 
-  const chartData = Array.isArray(data) && data.length > 0 ? data : mockData;
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 640);
+    handler();
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+
+  const mockData: ChartItem[] = useMemo(
+    () => [
+      {
+        name: "Jan",
+        month: 1,
+        plan: 0,
+        capacity: 0,
+        summary: {},
+      },
+    ],
+    []
+  );
+
+  const chartData =
+    Array.isArray(data) && data.length > 0 ? data : mockData;
+
   const hasRealData = Array.isArray(data) && data.length > 0;
-  const isSingleMonth = chartData.length === 1;
 
   const handleBarClick = (event: any) => {
     const payload: ChartItem | undefined = event?.payload;
-    if (!payload) return;
-    onBarClick?.(payload);
+    if (payload) onBarClick?.(payload);
   };
 
-  function mapSummaryToRoleData(summary: any) {
-    return ROLE_CONFIG.map(function (role) {
-      const roleData = summary?.[role.key] || {};
+  const mapSummaryToRoleData = (summary: ChartItem["summary"]) =>
+    ROLE_CONFIG.map((role) => {
+      const roleData = summary?.[role.key as keyof ChartItem["summary"]];
       return {
         role: role.label,
-        plan: roleData.plan || 0,
-        capacity: roleData.capacity || 0,
+        plan: roleData?.plan || 0,
+        capacity: roleData?.capacity || 0,
       };
     });
-  };
-
-  const barColors = {
-    plan: "#FACC15",     // 🟡 Plan
-    capacity: "#60A5FA", // 🔵 Capacity
-  };
 
   return (
-    <div className="border rounded-xl bg-white p-6">
+    <div className="border rounded-xl bg-white p-4 sm:p-6">
+      {/* =========================
+          HEADER
+      ========================= */}
       <div className="flex items-center mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">
-          Resource Planning{" "}
+        <h2 className="text-base sm:text-lg font-semibold text-gray-800">
+          Resource Planning
           <span className="ml-2 px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-700">
             {displayYear}
           </span>
         </h2>
       </div>
 
-
-      {/* Resource Planning */}
-      <div className="h-[360px] w-full">
+      {/* =========================
+          MAIN CHART
+      ========================= */}
+      <div className="h-[260px] sm:h-80 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={chartData}
-            barGap={8}
-            barCategoryGap="20%"
-            margin={{ top: 20, right: 20, left: 10, bottom: 20 }}
+            barGap={6}
+            barCategoryGap={isMobile ? "15%" : "20%"}
+            margin={{
+              top: isMobile ? 12 : 20,
+              right: 16,
+              left: 0,
+              bottom: isMobile ? 20 : 30,
+            }}
           >
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis dataKey="name" axisLine={false} tickLine={false} />
             <YAxis axisLine={false} tickLine={false} />
             <Tooltip />
-            <Legend verticalAlign="bottom" height={36} />
+
+            {!isMobile && (
+              <Legend verticalAlign="bottom" iconType="circle" />
+            )}
 
             <Bar
               dataKey="plan"
               name="Total Plan (MD)"
-              fill={barColors.plan}
+              fill={BAR_COLORS.plan}
               radius={[6, 6, 0, 0]}
               onClick={handleBarClick}
             >
-              <LabelList dataKey="plan" position="top" />
+              {!isMobile && (
+                <LabelList dataKey="plan" position="top" fontSize={12} />
+              )}
             </Bar>
 
             <Bar
               dataKey="capacity"
               name="Total Capacity (MD)"
-              fill={barColors.capacity}
+              fill={BAR_COLORS.capacity}
               radius={[6, 6, 0, 0]}
               onClick={handleBarClick}
             >
-              <LabelList dataKey="capacity" position="top" />
+              {!isMobile && (
+                <LabelList
+                  dataKey="capacity"
+                  position="top"
+                  fontSize={12}
+                />
+              )}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
@@ -144,46 +169,39 @@ export function ChartSection({ data, year, onBarClick }: ChartSectionProps) {
         </p>
       )}
 
-      {/* Resource By Role */}
-      <div className="mt-12">
-        <div className="font-semibold text-gray-800 mb-6">
+      {/* =========================
+          RESOURCE BY ROLE
+      ========================= */}
+      <div className="mt-8">
+        <div className="font-semibold text-gray-800 mb-4">
           Resource Planning by Role
         </div>
-
-        <div
-          className={
-            isSingleMonth
-              ? "flex flex-wrap gap-8"
-              : "flex gap-8 overflow-x-auto pb-4"
-          }
-        >
-          {chartData.map(function (monthItem) {
-            const roleSummaryData = mapSummaryToRoleData(
-              monthItem.summary
-            );
+        
+        <div className="flex flex-nowrap gap-6 overflow-x-auto pb-4">
+          {chartData.map((monthItem) => {
+            const roleData = mapSummaryToRoleData(monthItem.summary);
 
             return (
               <div
                 key={monthItem.month}
-                className={
-                  isSingleMonth
-                    ? "w-full"
-                    : "min-w-[420px]"
-                }
+                className="min-w-[320px] sm:min-w-[380px] lg:min-w-[420px]"
               >
-                {/* Month Label */}
                 <div className="text-center mb-2 text-sm font-medium text-gray-700">
                   {monthItem.name}
                 </div>
 
-                {/* Chart */}
-                <div className="h-[260px] w-full">
+                <div className="h-[220px] sm:h-60 lg:h-[260px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
-                      data={roleSummaryData}
-                      barCategoryGap="25%"
+                      data={roleData}
                       barGap={6}
-                      margin={{ top: 24, right: 20, left: 10, bottom: 40 }}
+                      barCategoryGap={isMobile ? "15%" : "25%"}
+                      margin={{
+                        top: isMobile ? 12 : 24,
+                        right: 16,
+                        left: 0,
+                        bottom: isMobile ? 24 : 40,
+                      }}
                     >
                       <CartesianGrid
                         strokeDasharray="3 3"
@@ -194,17 +212,17 @@ export function ChartSection({ data, year, onBarClick }: ChartSectionProps) {
                         dataKey="role"
                         axisLine={false}
                         tickLine={false}
-                        tick={{ fill: "#374151", fontSize: 12 }}
+                        tick={{ fontSize: 11 }}
                       />
 
-                      <YAxis
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fill: "#6B7280", fontSize: 11 }}
-                      />
+                      <YAxis axisLine={false} tickLine={false} />
 
                       <Tooltip
-                        formatter={(value: number, _name: string, payload: any) => [
+                        formatter={(
+                          value: number,
+                          _,
+                          payload: any
+                        ) => [
                           value,
                           payload?.dataKey === "plan"
                             ? "Plan (MD)"
@@ -212,42 +230,43 @@ export function ChartSection({ data, year, onBarClick }: ChartSectionProps) {
                         ]}
                       />
 
-                      {/* 🟡 PLAN */}
                       <Bar
                         dataKey="plan"
                         name="Plan (MD)"
-                        fill="#FACC15"
+                        fill={BAR_COLORS.plan}
                         radius={[6, 6, 0, 0]}
                       >
-                        <LabelList
-                          dataKey="plan"
-                          position="top"
-                          fontSize={11}
-                        />
+                        {!isMobile && (
+                          <LabelList
+                            dataKey="plan"
+                            position="top"
+                            fontSize={11}
+                          />
+                        )}
                       </Bar>
 
-                      {/* 🔵 CAPACITY */}
                       <Bar
                         dataKey="capacity"
                         name="Capacity (MD)"
-                        fill="#60A5FA"
+                        fill={BAR_COLORS.capacity}
                         radius={[6, 6, 0, 0]}
                       >
-                        <LabelList
-                          dataKey="capacity"
-                          position="top"
-                          fontSize={11}
-                        />
+                        {!isMobile && (
+                          <LabelList
+                            dataKey="capacity"
+                            position="top"
+                            fontSize={11}
+                          />
+                        )}
                       </Bar>
 
-                      {/* ✅ LEGEND DI BAWAH */}
-                      <Legend
-                        verticalAlign="bottom"
-                        align="center"
-                        iconType="circle"
-                        iconSize={10}
-                        wrapperStyle={{ paddingTop: 12 }}
-                      />
+                      {!isMobile && (
+                        <Legend
+                          verticalAlign="bottom"
+                          iconType="circle"
+                          wrapperStyle={{ paddingTop: 12 }}
+                        />
+                      )}
                     </BarChart>
                   </ResponsiveContainer>
                 </div>

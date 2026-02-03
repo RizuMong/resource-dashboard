@@ -11,7 +11,7 @@ import {
   LabelList,
   Legend,
 } from "recharts";
-import { useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
 
 export interface ProductivityData {
   name: string;
@@ -33,7 +33,7 @@ export interface ProductivityData {
 interface ProductivitySectionProps {
   data?: ProductivityData[];
   onBarClick?: (payload: ProductivityData) => void;
-};
+}
 
 const ROLE_CONFIG = [
   { key: "solution_engineer", label: "SE" },
@@ -52,13 +52,9 @@ const BAR_COLORS = {
 function hasMeaningfulData(item: ProductivityData) {
   if (item.actual > 0 || item.plan > 0) return true;
 
-  if (item.summary) {
-    return Object.values(item.summary).some(
-      (role) => role && (role.plan > 0 || role.actual > 0)
-    );
-  }
-
-  return false;
+  return Object.values(item.summary || {}).some(
+    (role) => role && (role.plan > 0 || role.actual > 0)
+  );
 }
 
 function mapSummaryToRoleData(summary: ProductivityData["summary"]) {
@@ -76,6 +72,15 @@ export function ProductivitySection({
   data,
   onBarClick,
 }: ProductivitySectionProps) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 640);
+    handler();
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+
   const mockData: ProductivityData[] = useMemo(
     () => [
       {
@@ -97,43 +102,43 @@ export function ProductivitySection({
   );
 
   const hasData = filteredChartData.length > 0;
-  const isSingleMonth = filteredChartData.length === 1;
 
   const handleBarClick = (event: any) => {
     const payload: ProductivityData | undefined = event?.payload;
-    if (!payload) return;
-    onBarClick?.(payload);
+    if (payload) onBarClick?.(payload);
   };
 
   return (
-    <div className="border rounded-xl bg-white p-6">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">
+    <div className="border rounded-xl bg-white p-4 sm:p-6">
+      <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">
         Productivity Overview
       </h2>
 
-      <div className="h-[360px] w-full">
+      {/* =========================
+          MAIN CHART
+      ========================= */}
+      <div className="h-[260px] sm:h-80 w-full">
         {hasData ? (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={filteredChartData}
-              barGap={8}
-              barCategoryGap="20%"
-              margin={{ top: 20, right: 20, left: 10, bottom: 20 }}
+              barGap={6}
+              barCategoryGap={isMobile ? "15%" : "20%"}
+              margin={{
+                top: isMobile ? 12 : 20,
+                right: 16,
+                left: 0,
+                bottom: isMobile ? 20 : 30,
+              }}
             >
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
-
-              <XAxis
-                dataKey="name"
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 12 }}
-              />
-
+              <XAxis dataKey="name" axisLine={false} tickLine={false} />
               <YAxis axisLine={false} tickLine={false} />
-
               <Tooltip />
 
-              <Legend verticalAlign="bottom" iconType="circle" />
+              {!isMobile && (
+                <Legend verticalAlign="bottom" iconType="circle" />
+              )}
 
               <Bar
                 dataKey="actual"
@@ -142,7 +147,9 @@ export function ProductivitySection({
                 radius={[6, 6, 0, 0]}
                 onClick={handleBarClick}
               >
-                <LabelList dataKey="actual" position="top" fontSize={12} />
+                {!isMobile && (
+                  <LabelList dataKey="actual" position="top" fontSize={12} />
+                )}
               </Bar>
 
               <Bar
@@ -152,7 +159,9 @@ export function ProductivitySection({
                 radius={[6, 6, 0, 0]}
                 onClick={handleBarClick}
               >
-                <LabelList dataKey="plan" position="top" fontSize={12} />
+                {!isMobile && (
+                  <LabelList dataKey="plan" position="top" fontSize={12} />
+                )}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -164,52 +173,52 @@ export function ProductivitySection({
       </div>
 
       {/* =========================
-          Resource by Role
+          PRODUCTIVITY BY ROLE
       ========================= */}
       {hasData && (
-        <div className="mt-10">
+        <div className="mt-8">
           <div className="font-semibold text-gray-800 mb-4">
             Productivity by Role
           </div>
 
-          <div
-            className={
-              isSingleMonth
-                ? "flex flex-wrap gap-8"
-                : "flex gap-8 overflow-x-auto pb-4"
-            }
-          >
+          {/* ⬅️➡️ HORIZONTAL SCROLL ONLY */}
+          <div className="flex flex-nowrap gap-6 overflow-x-auto pb-4">
             {filteredChartData.map((monthItem) => {
               const roleData = mapSummaryToRoleData(monthItem.summary);
 
               return (
                 <div
                   key={monthItem.month}
-                  className={isSingleMonth ? "w-full" : "min-w-[420px]"}
+                  className="min-w-[320px] sm:min-w-[380px] lg:min-w-[420px]"
                 >
                   <div className="text-center mb-2 text-sm font-medium">
                     {monthItem.name}
                   </div>
 
-                  <div className="h-[260px] w-full">
+                  <div className="h-[220px] sm:h-60 lg:h-[260px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart
                         data={roleData}
                         barGap={6}
-                        barCategoryGap="25%"
-                        margin={{ top: 24, right: 20, left: 10, bottom: 40 }}
+                        barCategoryGap={isMobile ? "15%" : "25%"}
+                        margin={{
+                          top: isMobile ? 12 : 24,
+                          right: 16,
+                          left: 0,
+                          bottom: isMobile ? 24 : 40,
+                        }}
                       >
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          vertical={false}
+                        />
                         <XAxis
                           dataKey="role"
                           axisLine={false}
                           tickLine={false}
-                          tick={{ fontSize: 12 }}
+                          tick={{ fontSize: 11 }}
                         />
-
                         <YAxis axisLine={false} tickLine={false} />
-
                         <Tooltip />
 
                         <Bar
@@ -218,7 +227,13 @@ export function ProductivitySection({
                           fill={BAR_COLORS.plan}
                           radius={[6, 6, 0, 0]}
                         >
-                          <LabelList dataKey="plan" position="top" fontSize={11} />
+                          {!isMobile && (
+                            <LabelList
+                              dataKey="plan"
+                              position="top"
+                              fontSize={11}
+                            />
+                          )}
                         </Bar>
 
                         <Bar
@@ -227,18 +242,22 @@ export function ProductivitySection({
                           fill={BAR_COLORS.actual}
                           radius={[6, 6, 0, 0]}
                         >
-                          <LabelList
-                            dataKey="actual"
-                            position="top"
-                            fontSize={11}
-                          />
+                          {!isMobile && (
+                            <LabelList
+                              dataKey="actual"
+                              position="top"
+                              fontSize={11}
+                            />
+                          )}
                         </Bar>
 
-                        <Legend
-                          verticalAlign="bottom"
-                          iconType="circle"
-                          wrapperStyle={{ paddingTop: 12 }}
-                        />
+                        {!isMobile && (
+                          <Legend
+                            verticalAlign="bottom"
+                            iconType="circle"
+                            wrapperStyle={{ paddingTop: 12 }}
+                          />
+                        )}
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
